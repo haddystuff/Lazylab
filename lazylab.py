@@ -1,0 +1,154 @@
+import sys
+import yaml
+import libvirt
+from xml.etree import ElementTree
+from base_manage_vm import BaseManageVM
+from juniper_vmx_14_manage_all import JuniperVMX14ManageAll
+from cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
+from config_parser import *
+from zipfile import ZipFile
+import os
+import ftplib
+
+
+"""
+This script is actually containing UI and business logic in one place so we need to divide it as soon as possible
+"""
+
+
+def download_template_image(distribution):
+    with ftplib.FTP(IMAGES_FTP, 'anonymous', 'anonymous@domain.com') as ftp:
+        ftp.cwd('/pub')
+        with open(VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2', 'wb') as f:
+            ftp.retrbinary('RETR ' + distribution + '_template.qcow2', f.write)
+    return(0)
+
+def check_if_template_image_exist(distribution):
+    if os.path.isfile(VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2'):
+        return(0)
+    else:
+        print('No' + distribution + 'image\nDownloading...')
+        download_template_image(distribution)
+
+
+def yaml_validate(conf_yaml):
+    """
+    This function check if yaml file has right structure
+    """
+    #Getting list of vms
+    list_of_vms = conf_yaml["vms"]
+    
+    #Check if vms is actualy existing
+    if list_of_vms == None:
+        print("No \"vms\" block in config file")
+        exit(1)
+    #Check if lab name existing
+    if conf_yaml["lab_name"] == None:
+        print("No \"lab_name\" block in config file")
+        exit(1)
+    
+    #Check vm one by one.
+    for vm in list_of_vms:
+        #Check if name of vm is actially exist
+        if vm['name'] == None:
+            print("No \"VM Name\" block in config file")
+            exit(1)
+        
+        #Check if vm has right os and version(distibution in this context)
+        distribution = vm['os'] + '_' + str(vm['version'])
+        
+        if not(distribution in POSSIBLE_OS_LIST):
+            print('Yaml file has bad syntax: wrong os name')
+            exit(1)
+        
+        #Check if image of os exist on local disk
+        check_if_template_image_exist(distribution)
+    return(0)
+
+
+def create_device_dict_with_archive(config_archive_location):
+    """
+    This function creating dict of manage objects from zip archive. It actially looks like this:
+    { Testlab_router1: CiscoIOSXR15ManageAll_object
+      Testlab_router2: JuniperVMX14ManageAll_object
+    }
+    """
+    #Opening config file in zip archive, parsing with yaml and sending to conf_yaml valiable
+    with ZipFile(config_archive_location, 'r') as lazy_archive:
+        conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), Loader=yaml.FullLoader)
+    
+    #Validating syntax and more of conf_yaml
+    yaml_validate(conf_yaml)
+    
+    #Setting some valiables
+    lab_name = conf_yaml["lab_name"]
+    cur_port = TELNET_STARTING_PORT
+    list_of_vms = conf_yaml["vms"]
+    devices = {}
+    
+    #Creating vm dictionary called "devices" one by one 
+    for vm in list_of_vms:
+        vm_config_file = vm['name'] + '.conf'
+        
+        #Getting config of device from zip archive
+        try:
+            with ZipFile(config_archive_location, 'r') as lazy_archive:
+                vm_config = lazy_archive.read(vm_config_file).decode("utf-8")
+        except Exception as err:
+            vm_config = None
+        
+        cur_port += 1
+        distribution = (vm['os'] + '_' + str(vm['version']))
+        
+        #Creating objects base on its OS
+        if (distribution) == 'juniper_vmx_14':
+            devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name, vm, cur_port, vm_config)
+        elif (distribution) == 'cisco_iosxr_15':
+            devices[lab_name + '_' + vm['name']] = CiscoIOSXR15ManageAll(lab_name, vm, cur_port, vm_config)
+    return(devices)  
+
+
+if __name__ == "__main__":
+    
+    # Checking if argument is define and saving name of zip archive from one of arguments
+    if len(sys.argv) == 1:
+        print('No argument :(\nPlease use one of this:\n  1.deploy\n  2.delete\n 3.save')
+        sys.exit(1)
+    elif len(sys.argv) == 2:
+        config_archive_location = sys.path[0] + '/labs/' + 'default' + '.zip'
+    elif len(sys.argv) == 3:
+        config_archive_location = sys.path[0] + '/labs/' + sys.argv[2] + '.zip'
+    else:
+        print('Too many arguments, please use:\n  1.deploy\n  2.delete\n as first argument and directory of configs as second')
+        exit(1)
+       
+    #Parsing arguments and working with manage objects
+    if sys.argv[1] == 'deploy':
+        # Create dictionary of managment objects using function
+        print('Deploying lab')
+        devices = create_device_dict_with_archive(config_archive_location)
+        #Deploying step by step. Methods of managment object is actually self explanitory.
+        for device in devices:
+            devices[device].create_net()
+            devices[device].clone_volume()
+            devices[device].create_vm()
+            devices[device].waiting()
+            devices[device].configure_vm()
+            
+    elif sys.argv[1] == 'delete':
+        # Deleting vms obviosly
+        print('Deleting lab')
+        devices = create_device_dict_with_archive(config_archive_location)
+        for device in devices:
+            devices[device].destroy_vm()
+            devices[device].delete_volume()
+    #Working on this
+    #    elif sys.argv[1] == 'save':
+    #        # Save configs
+    #        print('savings lab')
+    #        for device in devices:
+    #            devices[device].save_config_vm()
+    else:
+        print('Bad argument :(\nPlease use one of this:\n  1.deploy\n  2.delete')
+        exit(1)
+exit(0)

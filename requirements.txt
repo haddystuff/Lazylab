@@ -1,0 +1,5 @@
+jinja2
+pyYAML
+junos-eznc
+libvirt
+ElementTree

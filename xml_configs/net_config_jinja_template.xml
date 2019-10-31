@@ -1,0 +1,4 @@
+<network>
+  <name>{{net_name}}</name>
+  <domain name='{{net_name}}'/>
+</network>
