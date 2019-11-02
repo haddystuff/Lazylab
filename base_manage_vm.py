@@ -5,7 +5,6 @@ import os
 from xml.etree import ElementTree
 from jinja2 import Template
 import libvirt
-import time
 
 
 class BaseManageVM(object):

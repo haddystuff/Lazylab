@@ -1,5 +1,4 @@
 from abc import ABC
-import constants
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 from base_manage_config import BaseManageConfig 
@@ -38,7 +37,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     def save_config_vm(self):
         self.get_vm_tcp_port()
         try:
-            with Device(host='127.0.0.1', user='root' mode='telnet', port=str(self.port)) as dev:
+            with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port)) as dev:
                 self.vm_config = (dev.cli("show configuration", format='text', warning=False))
         except Exception as err:
             print (err)

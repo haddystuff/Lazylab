@@ -1,7 +1,6 @@
 import sys
 import yaml
 import libvirt
-from xml.etree import ElementTree
 from base_manage_vm import BaseManageVM
 from juniper_vmx_14_manage_all import JuniperVMX14ManageAll
 from cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
