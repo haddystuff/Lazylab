@@ -114,9 +114,9 @@ if __name__ == "__main__":
         print('No argument :(\nPlease use one of this:\n  1.deploy\n  2.delete\n 3.save')
         sys.exit(1)
     elif len(sys.argv) == 2:
-        config_archive_location = sys.path[0] + '/labs/' + 'default' + '.zip'
+        config_archive_location = sys.path[0] + '/labs/' + 'default' + '.lazy'
     elif len(sys.argv) == 3:
-        config_archive_location = sys.path[0] + '/labs/' + sys.argv[2] + '.zip'
+        config_archive_location = sys.path[0] + '/labs/' + sys.argv[2] + '.lazy'
     else:
         print('Too many arguments, please use:\n  1.deploy\n  2.delete\n as first argument and directory of configs as second')
         exit(1)
