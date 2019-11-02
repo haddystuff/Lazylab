@@ -23,8 +23,9 @@ class BaseManageVM(object):
         self.port = port
         self.vm_config = vm_config
         self.vm_name = self.lab_name + '_' + vm['name']
-        self.vm_discription = "auto-generated vm with autodeploytool for " + self.lab_name + " lab"
         self.distribution = vm['os'] + '_' + str(vm['version'])
+        #line is too long. Need to fix
+        self.vm_discription = "auto-generated vm with lazylab\n" + "Lab Name: " + self.lab_name + "\nVM name:" + self.vm_name + "\nDistibution:" + self.distribution
         self.wait_miliseconds = 2000
 
 
