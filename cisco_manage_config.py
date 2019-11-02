@@ -13,7 +13,11 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             print("No config file. Using default settings")
             return(0)
         try:
+            #That's a POC of config loading method so we need to rewrite it soon.
+            #Connecting to console using telnet
             tn = telnetlib.Telnet("127.0.0.1", str(self.port), 5)
+            
+            #In this block we send commands one by one and getting results
             tn.write(b"\n\r") 
             print(tn.read_until(b"name: ", 5)) 
             tn.write(b"root\r") 
@@ -22,7 +26,11 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             print(tn.read_until(b"#", 5)) 
             tn.write(b"configure\n") 
             print(tn.read_until(b"#", 5))
+            
+            #sending config encoded in utf-8
             tn.write(self.vm_config.encode('utf-8'))
+            
+            #Commiting
             print(tn.read_until(b"[cancel]:", 5))
             tn.write(b"yes\n") 
             tn.write(b"exit\n") 

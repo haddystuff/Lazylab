@@ -131,6 +131,7 @@ class BaseManageVM(object):
         This method getting tcp port of console connection of existing vm.
         """
         with libvirt.open('qemu:///system') as self.virt_conn:
+            #Getting tcp port from device xml file with ElementTree
             dom = conn.lookupByName(self.vm_name)
             root = ElementTree.fromstring(dom.XMLDesc(0))
             console = next(root.iter('console'))
@@ -146,7 +147,7 @@ class BaseManageVM(object):
         with libvirt.open('qemu:///system') as self.virt_conn:
             for interface, net in self.vm['interfaces'].items():
                 
-                #Opening and rendering jinja template
+                #Opening and rendering jinja virtual network template
                 with open(os.path.join(sys.path[0] + "/xml_configs/" + 'net_config_jinja_template.xml')) as xml_jinja_template:
                     template = Template(xml_jinja_template.read())
                 config_string = template.render(net_name = net)
