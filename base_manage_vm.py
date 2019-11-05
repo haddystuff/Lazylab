@@ -8,7 +8,7 @@ import libvirt
 
 
 class BaseManageVM(object):
-    def __init__(self, lab_name, vm, port, vm_config):
+    def __init__(self, **args):
         """
         This is the base class you have to inherit from when writing new manage objects.
         :param lab_name(str): name of lab.
@@ -18,12 +18,12 @@ class BaseManageVM(object):
         :param config_file_object(file): file object of vm config file. If there's no config file then value of config_file_object must me "None".
         :return:
         """
-        self.lab_name = lab_name
-        self.vm = vm
-        self.port = port
-        self.vm_config = vm_config
-        self.vm_name = self.lab_name + '_' + vm['name']
-        self.distribution = vm['os'] + '_' + str(vm['version'])
+        self.lab_name = args.get('lab_name', 'Unknown_lab')
+        self.vm = args.get('vm', DEFAULT_VM_VARIABLE_VALUE)
+        self.port = args.get('port', None)
+        self.vm_config = args.get('vm_config', None)
+        self.vm_name = self.lab_name + '_' + self.vm['name']
+        self.distribution = self.vm['os'] + '_' + str(self.vm['version'])
         #line is too long. Need to fix
         self.vm_discription = "auto-generated vm with lazylab\n" + "Lab Name: " + self.lab_name + "\nVM name:" + self.vm_name + "\nDistibution:" + self.distribution
         self.wait_miliseconds = 2000

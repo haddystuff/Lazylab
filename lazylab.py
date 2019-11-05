@@ -101,9 +101,9 @@ def create_device_dict_with_archive(config_archive_location):
         
         #Creating objects base on its OS
         if (distribution) == 'juniper_vmx_14':
-            devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name, vm, cur_port, vm_config)
+            devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
         elif (distribution) == 'cisco_iosxr_15':
-            devices[lab_name + '_' + vm['name']] = CiscoIOSXR15ManageAll(lab_name, vm, cur_port, vm_config)
+            devices[lab_name + '_' + vm['name']] = CiscoIOSXR15ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
     return(devices)  
 
 
