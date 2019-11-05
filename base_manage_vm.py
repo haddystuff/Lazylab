@@ -10,12 +10,15 @@ import libvirt
 class BaseManageVM(object):
     def __init__(self, **args):
         """
-        This is the base class you have to inherit from when writing new manage objects.
+        This is the base class you have to inherit from when writing new manage
+        objects.
         :param lab_name(str): name of lab.
-        :param vm(dict): dictionary with vm parameters. Neet to read with one from config.yml - file with all of vm parameters and topology.
+        :param vm(dict): dictionary with vm parameters. Neet to read with one
+        from config.yml - file with all of vm parameters and topology.
         :param port(int): telnet port number, with use to get conlsole to vm.
         :param virt_conn: libvirt connection object.
-        :param config_file_object(file): file object of vm config file. If there's no config file then value of config_file_object must me "None".
+        :param config_file_object(file): file object of vm config file. If
+        there's no config file then value of config_file_object must me "None".
         :return:
         """
         self.lab_name = args.get('lab_name', 'Unknown_lab')
@@ -25,18 +28,24 @@ class BaseManageVM(object):
         self.vm_name = self.lab_name + '_' + self.vm['name']
         self.distribution = self.vm['os'] + '_' + str(self.vm['version'])
         #line is too long. Need to fix
-        self.vm_discription = "auto-generated vm with lazylab\n" + "Lab Name: " + self.lab_name + "\nVM name:" + self.vm_name + "\nDistibution:" + self.distribution
+        self.vm_discription = f"Auto-generated vm with lazylab\n"\
+                              f"Lab Name: {self.lab_name}\n"\
+                              f"VM name: {self.vm_name}\n"\
+                              f"Distibution: {self.distribution}"
         self.wait_miliseconds = 2000
 
 
     def clone_volume(self):
         """
         This method creates vm volume by cloning template volume.
-        To create new volume we need jinja2 template  wich is in "xml_configs" directory
+        To create new volume we need jinja2 template  wich is in "xml_configs"
+        directory
         """
+        
+        
         with libvirt.open('qemu:///system') as self.virt_conn:
             #Opening and rendering jinja template
-            with open(os.path.join(sys.path[0] + "/xml_configs/" + 'volume_config_jinja_template.xml')) as xml_jinja_template:
+            with open(VOLUME_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
                 template = Template(xml_jinja_template.read())
             self.volume_xml_config = template.render(vm_name = self.vm_name)
             
@@ -115,7 +124,8 @@ class BaseManageVM(object):
                 # Getting volume object
                 stgvol = pool.storageVolLookupByName(self.vm_name)
                 
-                # physically remove the storage volume from the underlying disk media
+                # physically remove the storage volume from the underlying
+                # disk media
                 stgvol.wipe()
                 
                 # logically remove the storage volume from the storage pool
@@ -148,7 +158,7 @@ class BaseManageVM(object):
             for interface, net in self.vm['interfaces'].items():
                 
                 #Opening and rendering jinja virtual network template
-                with open(os.path.join(sys.path[0] + "/xml_configs/" + 'net_config_jinja_template.xml')) as xml_jinja_template:
+                with open(NET_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
                     template = Template(xml_jinja_template.read())
                 config_string = template.render(net_name = net)
                 
