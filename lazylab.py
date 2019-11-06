@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 from tasker import deploy_lab
 from tasker import delete_lab
