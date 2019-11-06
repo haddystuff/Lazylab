@@ -4,19 +4,11 @@ from cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
 from config_parser import *
 from zipfile import ZipFile
 import os
-import ftplib
+from downloader import download_template_image
 
 """
 This file contain business logic functions that called from UI 
 """
-
-
-def download_template_image(distribution):
-    with ftplib.FTP(IMAGES_FTP, 'anonymous', 'anonymous@domain.com') as ftp:
-        ftp.cwd('/pub')
-        with open(VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2', 'wb') as f:
-            ftp.retrbinary('RETR ' + distribution + '_template.qcow2', f.write)
-    return(0)
 
 
 def check_if_template_image_exist(distribution):
