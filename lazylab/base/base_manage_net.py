@@ -1,4 +1,3 @@
-import constants
 from xml.etree import ElementTree
 
 class BaseManageNet(object):

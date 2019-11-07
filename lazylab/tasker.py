@@ -1,6 +1,6 @@
 import yaml
-from juniper_vmx_14_manage_all import JuniperVMX14ManageAll
-from cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
+from juniper.juniper_vmx_14_manage_all import JuniperVMX14ManageAll
+from cisco.cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
 from config_parser import *
 from zipfile import ZipFile
 import os

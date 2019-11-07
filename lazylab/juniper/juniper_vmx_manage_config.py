@@ -1,4 +1,4 @@
-from juniper_manage_config import JuniperManageConfig
+from juniper.juniper_manage_config import JuniperManageConfig
 
 class JuniperVMXManageConfig(JuniperManageConfig):
     """

@@ -1,6 +1,6 @@
 from abc import ABC
 import telnetlib
-from base_manage_config import BaseManageConfig
+from base.base_manage_config import BaseManageConfig
 
 class CiscoManageConfig(BaseManageConfig, ABC):
     """
