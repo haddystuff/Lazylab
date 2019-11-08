@@ -1,4 +1,4 @@
-from cisco.cisco_manage_config import CiscoManageConfig
+from lazylab.cisco.cisco_manage_config import CiscoManageConfig
 
 class CiscoIOSXRManageConfig(CiscoManageConfig):
     """

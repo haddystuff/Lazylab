@@ -1,10 +1,10 @@
 import yaml
-from juniper.juniper_vmx_14_manage_all import JuniperVMX14ManageAll
-from cisco.cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
-from config_parser import *
+from lazylab.juniper.juniper_vmx_14_manage_all import JuniperVMX14ManageAll
+from lazylab.cisco.cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
+from lazylab.config_parser import *
 from zipfile import ZipFile
 import os
-from downloader import download_template_image
+from lazylab.downloader import download_template_image
 
 """
 This file contain business logic functions that called from UI 

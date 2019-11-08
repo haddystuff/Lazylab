@@ -1,4 +1,4 @@
-from config_parser import *
+from lazylab.config_parser import *
 import libvirt
 import sys
 import os
@@ -70,7 +70,7 @@ class BaseManageVM(object):
                 nets.append(lan)
             
             #Opening and rendering jinja template
-            with open(os.path.join(sys.path[0] + "/xml_configs", self.distribution + '_jinja_template.xml')) as xml_jinja_template:
+            with open(PATH_TO_MODULE + "/xml_configs/" + self.distribution + '_jinja_template.xml') as xml_jinja_template:
                 template = Template(xml_jinja_template.read())
             config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name))
             self.vm_xml_config = config_string

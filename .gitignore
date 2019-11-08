@@ -1,2 +1,6 @@
 __pycache__/
 old_files/
+*.egg-info/
+build/
+develop-eggs/
+dist/

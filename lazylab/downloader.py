@@ -1,5 +1,5 @@
 import ftplib
-from config_parser import *
+from lazylab.config_parser import *
 
 def download_template_image(distribution):
     with ftplib.FTP(IMAGES_FTP, 'anonymous', 'anonymous@domain.com') as ftp:

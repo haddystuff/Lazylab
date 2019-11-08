@@ -1,4 +1,4 @@
-from juniper.juniper_manage_config import JuniperManageConfig
+from lazylab.juniper.juniper_manage_config import JuniperManageConfig
 
 class JuniperVMXManageConfig(JuniperManageConfig):
     """

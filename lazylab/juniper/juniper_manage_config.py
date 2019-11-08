@@ -1,7 +1,7 @@
 from abc import ABC
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
-from base.base_manage_config import BaseManageConfig 
+from lazylab.base.base_manage_config import BaseManageConfig 
 
 class JuniperManageConfig(BaseManageConfig, ABC):
     """

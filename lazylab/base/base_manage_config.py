@@ -1,7 +1,7 @@
 import time
 from abc import ABC
 import sys
-from config_parser import *
+from lazylab.config_parser import *
 
 class BaseManageConfig(ABC):
     """
