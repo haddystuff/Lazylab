@@ -1,0 +1,12 @@
+<pool type='dir'>
+  <name>{{pool_name}}</name>
+  <source>
+  </source>
+  <target>
+    <permissions>
+      <mode>0755</mode>
+      <owner>{{owner_uid}}</owner>
+      <group>{{owner_gid}}</group>
+    </permissions>
+  </target>
+</pool>

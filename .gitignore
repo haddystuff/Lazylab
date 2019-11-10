@@ -4,3 +4,4 @@ old_files/
 build/
 develop-eggs/
 dist/
+lazylab/images/**

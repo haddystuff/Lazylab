@@ -49,13 +49,14 @@ class BaseManageVM(object):
                 template = Template(xml_jinja_template.read())
             self.volume_xml_config = template.render(vm_name = self.vm_name)
             
-            # Connecting to storage pool
-            pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
+            # Connecting to storage pools
+            volume_pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
+            template_volume_pool = self.virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
             
             # Cloning volume from existing one
-            stgvol = pool.storageVolLookupByName(self.distribution + '_template.qcow2')
+            stgvol = template_volume_pool.storageVolLookupByName(self.distribution + '_template.qcow2')
             print('Creating new volume')
-            stgvol2 = pool.createXMLFrom(self.volume_xml_config, stgvol, 0)
+            stgvol2 = volume_pool.createXMLFrom(self.volume_xml_config, stgvol, 0)
         return(0)
 
 

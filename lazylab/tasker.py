@@ -12,7 +12,7 @@ This file contain business logic functions that called from UI
 
 
 def check_if_template_image_exist(distribution):
-    if os.path.isfile(VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2'):
+    if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2'):
         return(0)
     else:
         print('No' + distribution + 'image\nDownloading...')

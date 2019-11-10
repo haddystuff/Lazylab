@@ -7,7 +7,7 @@
   <allocation unit='bytes'>988553216</allocation>
   <physical unit='bytes'>988610560</physical>
   <target>
-    <path>/var/lib/libvirt/images/unetlab/vmx14/hda-clone-9.qcow2</path>
+    <path>{{path_to_image}}</path>
     <format type='qcow2'/>
     <permissions>
       <mode>0600</mode>
