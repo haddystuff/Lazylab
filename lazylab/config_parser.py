@@ -2,7 +2,7 @@ import configparser
 import sys
 import os
 """
-This is just a config parser. It parses lazylab.conf file
+This is config parser. It parses lazylab.conf file also sets static valiables.
 """
 
 #None config constants
