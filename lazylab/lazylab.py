@@ -28,7 +28,8 @@ def main():
         deploy_lab(config_archive_location)
             
     elif sys.argv[1] == 'delete':
-        delete_lab(config_archive_location)
+        lab_name = sys.argv[2]
+        delete_lab(lab_name)
     #Working on this
     #    elif sys.argv[1] == 'save':
     #        # Save configs

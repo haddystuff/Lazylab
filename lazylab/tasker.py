@@ -5,10 +5,35 @@ from lazylab.config_parser import *
 from zipfile import ZipFile
 import os
 from lazylab.downloader import download_template_image
+from xml.etree import ElementTree
 
 """
 This file contain business logic functions that called from UI 
 """
+
+def create_device_dict_with_running_vm_descritpions(lab_name):
+    import libvirt
+    
+    devices = {}
+    with libvirt.open('qemu:///system') as virt_conn:
+        for vm_libvirt_object in virt_conn.listAllDomains(1): 
+            vm_xml_root = ElementTree.fromstring(vm_libvirt_object.XMLDesc(0)) 
+            try:
+                vm_xml_description = next(vm_xml_root.iter('description'))
+            except StopIteration:
+                continue
+            vm_text_description = vm_xml_description.text 
+            if '#Auto-generated vm with lazylab' in vm_text_description: 
+                print ('I found this ---->' + vm_libvirt_object.name())
+                lab_param_dict = yaml.load(vm_text_description, Loader=yaml.FullLoader)
+                vm_param_dict = lab_param_dict['vm']
+                if lab_param_dict['lab_name'] == lab_name:
+                    distribution = (vm_param_dict['os'] + '_' + str(vm_param_dict['version']))
+                    if (distribution) == 'juniper_vmx_14':
+                        devices[lab_name + '_' + vm_param_dict['name']] = JuniperVMX14ManageAll(lab_name = lab_param_dict['lab_name'], vm = vm_param_dict)
+                    elif (distribution) == 'cisco_iosxr_15':
+                        devices[lab_name + '_' + vm_param_dict['name']] = CiscoIOSXR15ManageAll(lab_name = lab_param_dict['lab_name'], vm = vm_param_dict)
+    return(devices)
 
 
 def check_if_template_image_exist(distribution):
@@ -108,12 +133,13 @@ def deploy_lab(config_archive_location):
         devices[device].waiting()
         devices[device].configure_vm()
     return(0)
-    
 
-def delete_lab(config_archive_location):
+
+def delete_lab(lab_name):
     # Deleting vms obviosly
     print('Deleting lab')
-    devices = create_device_dict_with_archive(config_archive_location)
+    devices = create_device_dict_with_running_vm_descritpions(lab_name)
+    print(devices)
     for device in devices:
         devices[device].destroy_vm()
         devices[device].delete_volume()

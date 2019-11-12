@@ -14,7 +14,13 @@ class BaseManageVM(object):
         objects.
         :param lab_name(str): name of lab.
         :param vm(dict): dictionary with vm parameters. Neet to read with one
-        from config.yml - file with all of vm parameters and topology.
+        from config.yml - file with all of vm parameters and topology. Usually
+        looks like this: {'name': 'router2', 
+                          'os': 'cisco_iosxr',
+                          'version': 15,
+                          'interfaces': {'ge-0/0/0': 'Vxlan1', 
+                                         'ge-0/0/1': 'Vxlan2'}
+                          }
         :param port(int): telnet port number, with use to get conlsole to vm.
         :param virt_conn: libvirt connection object.
         :param config_file_object(file): file object of vm config file. If
@@ -28,12 +34,19 @@ class BaseManageVM(object):
         self.vm_name = self.lab_name + '_' + self.vm['name']
         self.distribution = self.vm['os'] + '_' + str(self.vm['version'])
         #line is too long. Need to fix
-        self.vm_discription = f"Auto-generated vm with lazylab\n"\
-                              f"Lab Name: {self.lab_name}\n"\
-                              f"VM name: {self.vm_name}\n"\
-                              f"Distibution: {self.distribution}"
+        #self.vm_discription = f"Auto-generated vm with lazylab\n"\
+        #                      f"Lab Name: {self.lab_name}\n"\
+        #                      f"VM name: {self.vm['name']}\n"\
+        #                      f"Distibution: {self.distribution}"
+        self.vm_discription = f"#Auto-generated vm with lazylab\n"\
+                              f"lab_name: {self.lab_name}\n"\
+                              f"vm:\n"\
+                              f"  name: {self.vm['name']}\n"\
+                              f"  os: {self.vm['os']}\n"\
+                              f"  version: {str(self.vm['version'])}"
+                              
         self.wait_miliseconds = 2000
-
+        print(self.vm)
 
     def clone_volume(self):
         """
