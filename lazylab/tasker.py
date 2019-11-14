@@ -10,29 +10,51 @@ from xml.etree import ElementTree
 """
 This file contain business logic functions that called from UI 
 """
+def create_zip_from_string(archive_path, filename, string):
+    config_archive = ZipFile(archive_path, mode="w")                                                 
+    config_archive.writestr(filename, string)                        
+    config_archive.close() 
+    return 0
 
 def create_device_dict_with_running_vm_descritpions(lab_name):
     import libvirt
     
+    #Creat diveces dictionary
     devices = {}
     with libvirt.open('qemu:///system') as virt_conn:
+        
+        #Getting runned vms objects in loop
         for vm_libvirt_object in virt_conn.listAllDomains(1): 
+            
+            #Getting xml of vm and root of that xml
             vm_xml_root = ElementTree.fromstring(vm_libvirt_object.XMLDesc(0)) 
+            
+            #Trying to get description
             try:
                 vm_xml_description = next(vm_xml_root.iter('description'))
             except StopIteration:
+                #going to the next element of loop if no description found
                 continue
-            vm_text_description = vm_xml_description.text 
+            
+            #Getting text of description
+            vm_text_description = vm_xml_description.text
+            
+            #Checking if vm is auto-generated
             if '#Auto-generated vm with lazylab' in vm_text_description: 
-                print ('I found this ---->' + vm_libvirt_object.name())
-                lab_param_dict = yaml.load(vm_text_description, Loader=yaml.FullLoader)
-                vm_param_dict = lab_param_dict['vm']
-                if lab_param_dict['lab_name'] == lab_name:
-                    distribution = (vm_param_dict['os'] + '_' + str(vm_param_dict['version']))
+                
+                # Loading discription in yaml format to lab_parameters variable
+                lab_parameters = yaml.load(vm_text_description, Loader=yaml.FullLoader)
+                
+                # Getting vm_parameters
+                vm_parameters = lab_parameters['vm']
+                
+                #Generating device dictionary(need to change way of generating later)
+                if lab_parameters['lab_name'] == lab_name:
+                    distribution = (vm_parameters['os'] + '_' + str(vm_parameters['version']))
                     if (distribution) == 'juniper_vmx_14':
-                        devices[lab_name + '_' + vm_param_dict['name']] = JuniperVMX14ManageAll(lab_name = lab_param_dict['lab_name'], vm = vm_param_dict)
+                        devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
                     elif (distribution) == 'cisco_iosxr_15':
-                        devices[lab_name + '_' + vm_param_dict['name']] = CiscoIOSXR15ManageAll(lab_name = lab_param_dict['lab_name'], vm = vm_param_dict)
+                        devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
     return(devices)
 
 
@@ -55,6 +77,7 @@ def yaml_validate(conf_yaml):
     if list_of_vms == None:
         print("No \"vms\" block in config file")
         exit(1)
+    
     #Check if lab name existing
     if conf_yaml["lab_name"] == None:
         print("No \"lab_name\" block in config file")
@@ -122,9 +145,11 @@ def create_device_dict_with_archive(config_archive_location):
 
 
 def deploy_lab(config_archive_location):
+    
     # Create dictionary of managment objects using function
     print('Deploying lab')
     devices = create_device_dict_with_archive(config_archive_location)
+    
     #Deploying step by step. Methods of managment object is actually self explanitory.
     for device in devices:
         devices[device].create_net()
@@ -138,18 +163,27 @@ def deploy_lab(config_archive_location):
 def delete_lab(lab_name):
     # Deleting vms obviosly
     print('Deleting lab')
+    
+    # generating device dictionary
     devices = create_device_dict_with_running_vm_descritpions(lab_name)
-    print(devices)
+    
+    # Deleteing vms in dictionary
     for device in devices:
         devices[device].destroy_vm()
         devices[device].delete_volume()
     return(0)
 
 
-#Working on this
-#def save_lab(config_archive_location)
-#        # Save configs
-#        print('savings lab')
-#        for device in devices:
-#            devices[device].save_config_vm()
+def save_lab(old_lab_name, new_lab_name):
+        # Save configs
+        print('savings lab')
+        config = {}
+        config['lab_name'] = new_lab_name
+        config['vms'] = []
+        devices = create_device_dict_with_running_vm_descritpions(old_lab_name)
+        for device in devices:
+            devices[device].get_vm_networks()
+            config['vms'].append(devices[device].vm)
+        config_str = yaml.dump(config)
+        create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", "config.yml", config_str)
 

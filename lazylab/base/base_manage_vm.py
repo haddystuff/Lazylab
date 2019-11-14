@@ -4,7 +4,6 @@ import sys
 import os
 from xml.etree import ElementTree
 from jinja2 import Template
-import libvirt
 
 
 class BaseManageVM(object):
@@ -33,19 +32,14 @@ class BaseManageVM(object):
         self.vm_config = args.get('vm_config', None)
         self.vm_name = self.lab_name + '_' + self.vm['name']
         self.distribution = self.vm['os'] + '_' + str(self.vm['version'])
-        #line is too long. Need to fix
-        #self.vm_discription = f"Auto-generated vm with lazylab\n"\
-        #                      f"Lab Name: {self.lab_name}\n"\
-        #                      f"VM name: {self.vm['name']}\n"\
-        #                      f"Distibution: {self.distribution}"
         self.vm_discription = f"#Auto-generated vm with lazylab\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
                               f"  name: {self.vm['name']}\n"\
                               f"  os: {self.vm['os']}\n"\
                               f"  version: {str(self.vm['version'])}"
-                              
         self.wait_miliseconds = 2000
+        self.interface_offset = INTERFACE_OFFSET_COMPARE_TO_CLASS[type(self).__name__]
         print(self.vm)
 
     def clone_volume(self):
@@ -80,13 +74,17 @@ class BaseManageVM(object):
         with libvirt.open('qemu:///system') as self.virt_conn:
             #Getting all virtuall networks names to nets[] list
             nets = []
+            #
+            for n in range(self.interface_offset):
+                nets.append(MANAGMENT_NET_NAME)
+            #
             for interface, lan in self.vm['interfaces'].items():
                 nets.append(lan)
             
             #Opening and rendering jinja template
             with open(PATH_TO_MODULE + "/xml_configs/" + self.distribution + '_jinja_template.xml') as xml_jinja_template:
                 template = Template(xml_jinja_template.read())
-            config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name))
+            config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name), managment_net_name = MANAGMENT_NET_NAME)
             self.vm_xml_config = config_string
         return(0)
 
@@ -183,3 +181,17 @@ class BaseManageVM(object):
                     continue
                 print(net)
         return(0)
+        
+    def get_vm_networks(self):
+        with libvirt.open('qemu:///system') as self.virt_conn:
+            vm_object = self.virt_conn.lookupByName(self.vm_name)
+            vm_xml_root = ElementTree.fromstring(vm_object.XMLDesc(0))  
+            interface_dictionary = {}
+            self.interface_prefix = INTERFACE_PREFIX_COMPARE_TO_CLASS[type(self).__name__]
+            for interface_number,interface in enumerate(vm_xml_root.iter('interface')): 
+                if interface_number - self.interface_offset < 0:
+                    continue
+                network = next(interface.iter('source')) 
+                interface_key = self.interface_prefix + str(interface_number)
+                interface_dictionary[interface_key] = network.get('network')
+        self.vm['interfaces'] = interface_dictionary

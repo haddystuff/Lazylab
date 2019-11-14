@@ -58,22 +58,13 @@
     <controller type='virtio-serial' index='0'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
     </controller>
-    <interface type='network'>
-      <source network='internal'/>
-      <model type='virtio'/>
-      <link state='down'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
-    </interface>
-    <interface type='network'>
-      <source network='internal'/>
-      <model type='virtio'/>
-      <link state='down'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
-    </interface>
     {% for net in nets %}
     <interface type='network'>
       <source network='{{net}}'/>
       <model type='virtio'/>
+      {% if net == managment_net_name %}
+      <link state='down'/>
+      {% endif %}
       <address type='pci' domain='0x0000' bus='0x00' function='0x0'/>
     </interface>
     {% endfor %}

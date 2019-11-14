@@ -3,6 +3,7 @@ import lazylab
 import sys
 from lazylab.tasker import deploy_lab
 from lazylab.tasker import delete_lab
+from lazylab.tasker import save_lab
 from lazylab.config_parser import *
 
 """
@@ -19,9 +20,9 @@ def main():
         config_archive_location = PATH_TO_MODULE + '/labs/' + 'default' + '.lazy'
     elif len(sys.argv) == 3:
         config_archive_location = PATH_TO_MODULE + '/labs/' + sys.argv[2] + '.lazy'
-    else:
-        print('Too many arguments, please use:\n  1.deploy\n  2.delete\n as first argument and directory of configs as second')
-        exit(1)
+    # else:
+        # print('Too many arguments, please use:\n  1.deploy\n  2.delete\n as first argument and directory of configs as second')
+        # exit(1)
        
     #Parsing arguments and working with manage objects
     if sys.argv[1] == 'deploy':
@@ -30,12 +31,13 @@ def main():
     elif sys.argv[1] == 'delete':
         lab_name = sys.argv[2]
         delete_lab(lab_name)
-    #Working on this
-    #    elif sys.argv[1] == 'save':
-    #        # Save configs
-    #        print('savings lab')
-    #        for device in devices:
-    #            devices[device].save_config_vm()
+    
+    elif (sys.argv[1] == 'save') and (sys.argv[3] == 'as'):
+        # Save configs
+        print('savings lab')
+        old_lab_name = sys.argv[2]
+        new_lab_name = sys.argv[4]
+        save_lab(old_lab_name, new_lab_name)
     else:
         print('Bad argument :(\nPlease use one of this:\n  1.deploy\n  2.delete')
         exit(1)
