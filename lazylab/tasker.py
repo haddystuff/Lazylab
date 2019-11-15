@@ -6,18 +6,20 @@ from zipfile import ZipFile
 import os
 from lazylab.downloader import download_template_image
 from xml.etree import ElementTree
+import libvirt
 
 """
 This file contain business logic functions that called from UI 
 """
 def create_zip_from_string(archive_path, filename, string):
+    #this function write new file with string to archive.
+    
     config_archive = ZipFile(archive_path, mode="a")                                                 
     config_archive.writestr(filename, string)                        
     config_archive.close() 
     return 0
 
 def create_device_dict_with_running_vm_descritpions(lab_name):
-    import libvirt
     
     #Creat diveces dictionary
     devices = {}
@@ -62,7 +64,7 @@ def check_if_template_image_exist(distribution):
     if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2'):
         return(0)
     else:
-        print('No' + distribution + 'image\nDownloading...')
+        print('No ' + distribution + ' image\nDownloading...')
         download_template_image(distribution)
 
 
@@ -70,8 +72,8 @@ def yaml_validate(conf_yaml):
     """
     This function check if yaml file has right structure
     """
-    #Getting list of vms
-    list_of_vms = conf_yaml["vms"]
+    #Getting list of vms.
+    list_of_vms = conf_yaml.get("vms")
     
     #Check if vms is actualy existing
     if list_of_vms == None:
@@ -176,16 +178,32 @@ def delete_lab(lab_name):
 
 def save_lab(old_lab_name, new_lab_name):
         # Save configs
+        # Works bad sometimes need to work on this more
         print('savings lab')
-        config = {}
-        config['lab_name'] = new_lab_name
-        config['vms'] = []
+        # Creating config_dictionary
+        config_dictionary = {}
+        config_dictionary['lab_name'] = new_lab_name
+        config_dictionary['vms'] = []
+        
+        # Creating device dictionary
         devices = create_device_dict_with_running_vm_descritpions(old_lab_name)
+        
+        # Ctarting iteration using devices dictionary 
         for device in devices:
+            
+            # Find out network connections
             devices[device].get_vm_networks()
-            config['vms'].append(devices[device].vm)
-            devices[device].save_config_vm()
+            
+            # Adding device parameters to config_dictionary 
+            config_dictionary['vms'].append(devices[device].vm)
+            
+            # Find out vm config
+            devices[device].get_config_vm()
+            
+            # Getting vm_config to dev_config_str and sending it to archive
             dev_config_str = devices[device].vm_config
             create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", f"{devices[device].vm_short_name}.conf", dev_config_str)
-        config_str = yaml.dump(config)
+            
+        # converting config_dictionary to yaml string and sending it to archive
+        config_str = yaml.dump(config_dictionary)
         create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", "config.yml", config_str)

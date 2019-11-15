@@ -37,7 +37,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     
     
     #Save config method is in work, so please don't use it for now.
-    def save_config_vm(self):
+    def get_config_vm(self):
         self.get_vm_tcp_port()
         for key, password in PASSWORD_LIST:
             try:

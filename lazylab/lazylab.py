@@ -12,6 +12,7 @@ Its calling tasker functions
 """
 
 def main():
+    # We need to complitly rewrite this UI
     # Checking if argument is define and saving name of zip archive from one of arguments
     if len(sys.argv) == 1:
         print('No argument :(\nPlease use one of this:\n  1.deploy\n  2.delete\n 3.save')
