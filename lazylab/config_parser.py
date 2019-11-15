@@ -26,5 +26,4 @@ VOLUME_POOL_NAME = config['system']['volume_pool_name']
 CONFIG_FILE_NAME = config['system']['config_file_name']
 VOLUME_POOL_DIRECTORY = config['system']['volume_pool_directory']
 IMAGES_FTP = config['system']['images_ftp']
-DEFAULT_PASSWORD = config['passwords']['default_password']
-
+PASSWORD_LIST = config.items( "passwords" )

@@ -1,7 +1,10 @@
 from abc import ABC
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
+from jnpr.junos import exception
 from lazylab.base.base_manage_config import BaseManageConfig 
+from lazylab.config_parser import PASSWORD_LIST
+from time import sleep
 
 class JuniperManageConfig(BaseManageConfig, ABC):
     """
@@ -36,10 +39,14 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     #Save config method is in work, so please don't use it for now.
     def save_config_vm(self):
         self.get_vm_tcp_port()
-        try:
-            with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port)) as dev:
-                self.vm_config = (dev.cli("show configuration", format='text', warning=False))
-        except Exception as err:
-            print (err)
-            sys.exit(1)
+        for key, password in PASSWORD_LIST:
+            try:
+                print (password)
+                with Device(host='127.0.0.1', user='root', password=password, mode='telnet', port=str(self.port)) as dev:
+                    self.vm_config = (dev.cli("show configuration", format='text', warning=False))
+                break
+            except exception.ConnectAuthError as err:
+                print (err)
+                continue
+                exit(1)
         return(0)

@@ -11,7 +11,7 @@ from xml.etree import ElementTree
 This file contain business logic functions that called from UI 
 """
 def create_zip_from_string(archive_path, filename, string):
-    config_archive = ZipFile(archive_path, mode="w")                                                 
+    config_archive = ZipFile(archive_path, mode="a")                                                 
     config_archive.writestr(filename, string)                        
     config_archive.close() 
     return 0
@@ -184,6 +184,8 @@ def save_lab(old_lab_name, new_lab_name):
         for device in devices:
             devices[device].get_vm_networks()
             config['vms'].append(devices[device].vm)
+            devices[device].save_config_vm()
+            dev_config_str = devices[device].vm_config
+            create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", f"{devices[device].vm_short_name}.conf", dev_config_str)
         config_str = yaml.dump(config)
         create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", "config.yml", config_str)
-

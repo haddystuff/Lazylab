@@ -28,9 +28,10 @@ class BaseManageVM(object):
         """
         self.lab_name = args.get('lab_name', 'Unknown_lab')
         self.vm = args.get('vm', DEFAULT_VM_VARIABLE_VALUE)
+        self.vm_short_name = self.vm['name']
         self.port = args.get('port', None)
         self.vm_config = args.get('vm_config', None)
-        self.vm_name = self.lab_name + '_' + self.vm['name']
+        self.vm_name = self.lab_name + '_' + self.vm_short_name
         self.distribution = self.vm['os'] + '_' + str(self.vm['version'])
         self.vm_discription = f"#Auto-generated vm with lazylab\n"\
                               f"lab_name: {self.lab_name}\n"\
@@ -154,7 +155,7 @@ class BaseManageVM(object):
         """
         with libvirt.open('qemu:///system') as self.virt_conn:
             #Getting tcp port from device xml file with ElementTree
-            dom = conn.lookupByName(self.vm_name)
+            dom = self.virt_conn.lookupByName(self.vm_name)
             root = ElementTree.fromstring(dom.XMLDesc(0))
             console = next(root.iter('console'))
             tcp_port = console[0].get('service')
