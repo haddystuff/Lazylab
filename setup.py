@@ -24,6 +24,7 @@ setup(
 #    classifiers=[
 #        'GNU :: OSI Approved :: Python Software Foundation License'
 #    ]
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             'lazylab = lazylab.lazylab:main',

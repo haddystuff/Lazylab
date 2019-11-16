@@ -9,7 +9,8 @@ def download_template_image(distribution):
             # Get volume pool
             volume_pool = virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
             #if there is no pool, i create it
-        except libvirtError:                # i expect this: libvirtError('virStoragePoolLookupByName()failed', conn=self)
+        except Exception as err:
+            print(err)                # i expect this: libvirtError('virStoragePoolLookupByName()failed', conn=self)
             #Open jinja2 template file and render it.
             with open(PATH_TO_MODULE + "/xml_configs/" + 'volume_pool_config' + '_jinja_template.xml') as xml_jinja_template:
                 template = Template(xml_jinja_template.read())

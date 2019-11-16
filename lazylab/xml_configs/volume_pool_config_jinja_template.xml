@@ -3,6 +3,7 @@
   <source>
   </source>
   <target>
+    <path>{{volume_pool_path}}</path>
     <permissions>
       <mode>0755</mode>
       <owner>{{owner_uid}}</owner>
