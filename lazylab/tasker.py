@@ -67,7 +67,7 @@ def create_device_dict_with_running_vm_descritpions(lab_name):
 
 def check_if_template_image_exist(distribution):
     if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2'):
-        return(0)
+        return 0
     else:
         print('No ' + distribution + ' image\nDownloading...')
         download_template_image(distribution)

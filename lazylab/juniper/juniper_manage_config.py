@@ -38,15 +38,20 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     
     #Save config method is in work, so please don't use it for now.
     def get_config_vm(self):
+        """
+        This method gets self.vm_config(configuration string)
+        This method work realy bad if first password isnt right one, so we neet
+        to fix this in future
+        """
         self.get_vm_tcp_port()
         for key, password in PASSWORD_LIST:
             try:
                 print (password)
-                with Device(host='127.0.0.1', user='root', password=password, mode='telnet', port=str(self.port)) as dev:
+                with Device(host='127.0.0.1', user='root', password=password, mode='TELNET', port=str(self.port)) as dev:
                     self.vm_config = (dev.cli("show configuration", format='text', warning=False))
                 break
             except exception.ConnectAuthError as err:
-                print (err)
+                print(err)
                 continue
                 exit(1)
         return 0
