@@ -18,7 +18,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         #Checking if config is existing
         if self.vm_config == None:
             print("No config file. Using default settings")
-            return(0)
+            return 0
         
         #connecting to device, loading config and commiting
         try:
@@ -33,7 +33,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         except Exception as err:
             print (err)
             sys.exit(1)
-        return(0)
+        return 0
     
     
     #Save config method is in work, so please don't use it for now.
@@ -49,4 +49,4 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                 print (err)
                 continue
                 exit(1)
-        return(0)
+        return 0

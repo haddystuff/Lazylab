@@ -18,4 +18,4 @@ class BaseManageConfig(ABC):
             time.sleep(0.1)
             sys.stdout.write("\r" + animation[i % len(animation)])
             sys.stdout.flush()
-        return(0)
+        return 0

@@ -22,8 +22,8 @@ def download_template_image(distribution):
         
         #downloading images from ftp
         with ftplib.FTP(IMAGES_FTP, 'anonymous', 'anonymous@domain.com') as ftp:
-            ftp.cwd('/pub')
+            ftp.cwd(REMOTE_FTP_IMAGE_STORAGE_DIRECTORY_NAME)
             with open(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2', 'wb') as f:
                 ftp.retrbinary('RETR ' + distribution + '_template.qcow2', f.write)
         volume_pool.refresh()
-    return(0)
+    return 0

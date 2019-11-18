@@ -28,17 +28,17 @@ class BaseManageVM(object):
         """
         self.lab_name = args.get('lab_name', 'Unknown_lab')
         self.vm = args.get('vm', DEFAULT_VM_VARIABLE_VALUE)
-        self.vm_short_name = self.vm['name']
+        self.vm_short_name = self.vm.get('name')
         self.port = args.get('port', None)
         self.vm_config = args.get('vm_config', None)
         self.vm_name = self.lab_name + '_' + self.vm_short_name
-        self.distribution = self.vm['os'] + '_' + str(self.vm['version'])
+        self.distribution = self.vm.get('os') + '_' + str(self.vm.get('version'))
         self.vm_discription = f"#Auto-generated vm with lazylab\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
-                              f"  name: {self.vm['name']}\n"\
-                              f"  os: {self.vm['os']}\n"\
-                              f"  version: {str(self.vm['version'])}"
+                              f"  name: {self.vm.get('name')}\n"\
+                              f"  os: {self.vm.get('os')}\n"\
+                              f"  version: {str(self.vm.get('version'))}"
         self.wait_miliseconds = 2000
         self.interface_offset = INTERFACE_OFFSET_COMPARE_TO_CLASS[type(self).__name__]
         print(self.vm)
@@ -65,7 +65,7 @@ class BaseManageVM(object):
             stgvol = template_volume_pool.storageVolLookupByName(self.distribution + '_template.qcow2')
             print('Creating new volume')
             stgvol2 = volume_pool.createXMLFrom(self.volume_xml_config, stgvol, 0)
-        return(0)
+        return 0
 
 
     def create_xml(self):
@@ -87,7 +87,7 @@ class BaseManageVM(object):
                 template = Template(xml_jinja_template.read())
             config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name), managment_net_name = MANAGMENT_NET_NAME)
             self.vm_xml_config = config_string
-        return(0)
+        return 0
 
 
     def create_vm(self):
@@ -103,7 +103,7 @@ class BaseManageVM(object):
             # Creating and starting vm
             dom.create()
             print('Starting', self.vm_name)
-        return(0)
+        return 0
 
 
     def destroy_vm(self):
@@ -123,7 +123,7 @@ class BaseManageVM(object):
                 dom.undefine()
             except Exception:
                 print('Domain', self.vm_name, 'is already deleted')
-        return(0)
+        return 0
 
 
     def delete_volume(self):
@@ -146,7 +146,7 @@ class BaseManageVM(object):
                 
             except Exception:
                 print('Volume', self.vm_name, 'is already deleted')
-        return(0)
+        return 0
 
 
     def get_vm_tcp_port(self):
@@ -160,7 +160,7 @@ class BaseManageVM(object):
             console = next(root.iter('console'))
             tcp_port = console[0].get('service')
         self.port = tcp_port
-        return(0)
+        return 0
 
 
     def create_net(self):
@@ -168,7 +168,7 @@ class BaseManageVM(object):
         This method creates virtual network for vm.
         """
         with libvirt.open('qemu:///system') as self.virt_conn:
-            for interface, net in self.vm['interfaces'].items():
+            for interface, net in self.vm.get('interfaces').items():
                 
                 #Opening and rendering jinja virtual network template
                 with open(NET_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
@@ -181,7 +181,7 @@ class BaseManageVM(object):
                 except Exception as err:
                     continue
                 print(net)
-        return(0)
+        return 0
         
     def get_vm_networks(self):
         with libvirt.open('qemu:///system') as self.virt_conn:

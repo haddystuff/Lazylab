@@ -11,8 +11,13 @@ import libvirt
 """
 This file contain business logic functions that called from UI 
 """
+
+
 def create_zip_from_string(archive_path, filename, string):
-    #this function write new file with string to archive.
+    """
+    this function write new file with string to archive.
+    """
+    
     
     config_archive = ZipFile(archive_path, mode="a")                                                 
     config_archive.writestr(filename, string)                        
@@ -57,7 +62,7 @@ def create_device_dict_with_running_vm_descritpions(lab_name):
                         devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
                     elif (distribution) == 'cisco_iosxr_15':
                         devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
-    return(devices)
+    return devices
 
 
 def check_if_template_image_exist(distribution):
@@ -101,7 +106,7 @@ def yaml_validate(conf_yaml):
         
         #Check if image of os exist on local disk
         check_if_template_image_exist(distribution)
-    return(0)
+    return 0
 
 
 def create_device_dict_with_archive(config_archive_location):
@@ -144,7 +149,7 @@ def create_device_dict_with_archive(config_archive_location):
             devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
         elif (distribution) == 'cisco_iosxr_15':
             devices[lab_name + '_' + vm['name']] = CiscoIOSXR15ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
-    return(devices)
+    return devices
 
 
 def deploy_lab(config_archive_location):
@@ -160,7 +165,7 @@ def deploy_lab(config_archive_location):
         devices[device].create_vm()
         devices[device].waiting()
         devices[device].configure_vm()
-    return(0)
+    return 0
 
 
 def delete_lab(lab_name):
@@ -174,7 +179,7 @@ def delete_lab(lab_name):
     for device in devices:
         devices[device].destroy_vm()
         devices[device].delete_volume()
-    return(0)
+    return 0
 
 
 def save_lab(old_lab_name, new_lab_name):
@@ -208,3 +213,4 @@ def save_lab(old_lab_name, new_lab_name):
         # converting config_dictionary to yaml string and sending it to archive
         config_str = yaml.dump(config_dictionary)
         create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", "config.yml", config_str)
+        return 0
