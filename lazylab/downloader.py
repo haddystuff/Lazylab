@@ -25,5 +25,5 @@ def download_template_image(distribution):
             ftp.cwd('/pub')
             with open(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2', 'wb') as f:
                 ftp.retrbinary('RETR ' + distribution + '_template.qcow2', f.write)
-        pool.refresh()
+        volume_pool.refresh()
     return(0)

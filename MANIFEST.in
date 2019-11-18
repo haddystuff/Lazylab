@@ -2,3 +2,4 @@ include requirements*
 include lazylab/lazylab.conf
 include lazylab/xml_configs/*
 include lazylab/labs/*
+include lazylab/images/.gitkeep
