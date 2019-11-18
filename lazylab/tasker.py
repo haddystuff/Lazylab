@@ -48,11 +48,11 @@ def create_device_dict_with_running_vm_descritpions(lab_name):
                 lab_parameters = yaml.load(vm_text_description, Loader=yaml.FullLoader)
                 
                 # Getting vm_parameters
-                vm_parameters = lab_parameters['vm']
+                vm_parameters = lab_parameters.get('vm')
                 
                 #Generating device dictionary(need to change way of generating later)
                 if lab_parameters['lab_name'] == lab_name:
-                    distribution = (vm_parameters['os'] + '_' + str(vm_parameters['version']))
+                    distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
                     if (distribution) == 'juniper_vmx_14':
                         devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
                     elif (distribution) == 'cisco_iosxr_15':
@@ -93,7 +93,7 @@ def yaml_validate(conf_yaml):
             exit(1)
         
         #Check if vm has right os and version(distibution in this context)
-        distribution = vm['os'] + '_' + str(vm['version'])
+        distribution = vm.get('os') + '_' + str(vm.get('version'))
         
         if not(distribution in POSSIBLE_OS_LIST):
             print('Yaml file has bad syntax: wrong os name')
@@ -119,14 +119,14 @@ def create_device_dict_with_archive(config_archive_location):
     yaml_validate(conf_yaml)
     
     #Setting some valiables
-    lab_name = conf_yaml["lab_name"]
+    lab_name = conf_yaml.get("lab_name")
     cur_port = TELNET_STARTING_PORT
-    list_of_vms = conf_yaml["vms"]
+    list_of_vms = conf_yaml.get("vms")
     devices = {}
     
     #Creating vm dictionary called "devices" one by one 
     for vm in list_of_vms:
-        vm_config_file = vm['name'] + '.conf'
+        vm_config_file = vm.get('name') + '.conf'
         
         #Getting config of device from zip archive
         try:
@@ -136,9 +136,10 @@ def create_device_dict_with_archive(config_archive_location):
             vm_config = None
         
         cur_port += 1
-        distribution = (vm['os'] + '_' + str(vm['version']))
+        distribution = (vm.get('os') + '_' + str(vm.get('version')))
         
         #Creating objects base on its OS
+        # need to change way of generating later
         if (distribution) == 'juniper_vmx_14':
             devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
         elif (distribution) == 'cisco_iosxr_15':
