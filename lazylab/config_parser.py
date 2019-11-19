@@ -17,7 +17,7 @@ NET_CONFIG_JINJA_TEMPLATE = PATH_TO_MODULE + "/xml_configs/" + 'net_config_jinja
 TEMPLATE_VOLUME_POOL_NAME = 'lazylab'
 TEMPLATE_VOLUME_POOL_DIRECTORY = PATH_TO_MODULE + '/images/'
 MANAGMENT_NET_NAME = 'default'
-REMOTE_FTP_IMAGE_STORAGE_DIRECTORY_NAME = '/pub'
+REMOTE_FTP_IMAGE_STORAGE_DIRECTORY_NAME = '/lazylab'
 
 #config constants
 config = configparser.ConfigParser()

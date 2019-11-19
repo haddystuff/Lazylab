@@ -7,7 +7,7 @@ from lazylab.tasker import save_lab
 from lazylab.config_parser import *
 
 """
-This is pretty simple UI
+This is pretty simple UI. We need to complitely rewrite it
 Its calling tasker functions
 """
 

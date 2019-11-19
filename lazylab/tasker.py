@@ -24,14 +24,14 @@ def create_zip_from_string(archive_path, filename, string):
     config_archive.close() 
     return 0
 
-def create_device_dict_with_running_vm_descritpions(lab_name):
+def create_device_dict_with_vm_descritpions(lab_name, active_only=True):
     
     #Creat diveces dictionary
     devices = {}
     with libvirt.open('qemu:///system') as virt_conn:
         
         #Getting runned vms objects in loop
-        for vm_libvirt_object in virt_conn.listAllDomains(1): 
+        for vm_libvirt_object in virt_conn.listAllDomains(int(active_only)): 
             
             #Getting xml of vm and root of that xml
             vm_xml_root = ElementTree.fromstring(vm_libvirt_object.XMLDesc(0)) 
@@ -173,7 +173,7 @@ def delete_lab(lab_name):
     print('Deleting lab')
     
     # generating device dictionary
-    devices = create_device_dict_with_running_vm_descritpions(lab_name)
+    devices = create_device_dict_with_vm_descritpions(lab_name, active_only=False)
     
     # Deleteing vms in dictionary
     for device in devices:
@@ -192,7 +192,7 @@ def save_lab(old_lab_name, new_lab_name):
         config_dictionary['vms'] = []
         
         # Creating device dictionary
-        devices = create_device_dict_with_running_vm_descritpions(old_lab_name)
+        devices = create_device_dict_with_vm_descritpions(old_lab_name)
         
         # Ctarting iteration using devices dictionary 
         for device in devices:
