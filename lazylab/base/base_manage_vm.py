@@ -1,6 +1,5 @@
 from lazylab.config_parser import *
 import libvirt
-import sys
 import os
 from xml.etree import ElementTree
 from jinja2 import Template
@@ -196,3 +195,4 @@ class BaseManageVM(object):
                 interface_key = self.interface_prefix + str(interface_number)
                 interface_dictionary[interface_key] = network.get('network')
         self.vm['interfaces'] = interface_dictionary
+        return 0

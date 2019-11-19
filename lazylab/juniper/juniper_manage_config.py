@@ -8,7 +8,8 @@ from time import sleep
 
 class JuniperManageConfig(BaseManageConfig, ABC):
     """
-    This is base juniper manageconfig class, you have to inherit from it when writing new os manage_config class.
+    This is base juniper manageconfig class, you have to inherit from it when 
+    writing new os manage_config class.
     """
     
     
@@ -32,7 +33,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                         print('Bad config file\n Using default config')
         except Exception as err:
             print (err)
-            sys.exit(1)
+            exit(1)
         return 0
     
     
@@ -40,7 +41,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     def get_config_vm(self):
         """
         This method gets self.vm_config(configuration string)
-        This method work realy bad if first password isnt right one, so we neet
+        It work realy bad if first password isnt right one, so we neet
         to fix this in future
         """
         self.get_vm_tcp_port()
