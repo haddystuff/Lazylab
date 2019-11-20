@@ -30,7 +30,9 @@ def download_template_image(distribution):
         #downloading images from ftp
         with ftplib.FTP(IMAGES_FTP, 'anonymous', 'anonymous@domain.com') as ftp:
             ftp.cwd(REMOTE_FTP_IMAGE_STORAGE_DIRECTORY_NAME)
-            with open(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2', 'wb') as f:
-                ftp.retrbinary('RETR ' + distribution + '_template.qcow2', f.write)
+            volume_list = DISTRIBUTION_COMPARE_TO_IMAGE.get(distribution)
+            for template_volume_name in self.volume_list:
+                with open(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name, 'wb') as f:
+                    ftp.retrbinary('RETR ' + template_volume_name, f.write)
         volume_pool.refresh()
     return 0
