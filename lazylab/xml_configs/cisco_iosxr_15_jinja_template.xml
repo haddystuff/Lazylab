@@ -30,12 +30,14 @@
   </pm>
   <devices>
     <emulator>/usr/bin/qemu-kvm</emulator>
+    {% for volume_location in volume_location_list %}
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
       <source file='{{volume_location}}'/>
       <target dev='hda' bus='ide'/>
       <address type='drive' controller='0' bus='0' target='0' unit='0'/>
     </disk>
+    {% endfor %}
     <controller type='usb' index='0' model='ich9-ehci1'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x7'/>
     </controller>

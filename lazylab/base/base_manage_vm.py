@@ -43,6 +43,8 @@ class BaseManageVM(object):
                               f"  version: {str(self.vm.get('version'))}"
         self.wait_miliseconds = 2000
         self.interface_offset = INTERFACE_OFFSET_COMPARE_TO_CLASS[type(self).__name__]
+        self.volume_list = DISTRIBUTION_COMPARE_TO_IMAGE.get(self.distribution)
+        print(self.volume_list)
         print(self.vm)
 
     def clone_volume(self):
@@ -55,18 +57,20 @@ class BaseManageVM(object):
         
         with libvirt.open('qemu:///system') as self.virt_conn:
             #Opening and rendering jinja template
-            with open(VOLUME_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
-                template = Template(xml_jinja_template.read())
-            self.volume_xml_config = template.render(vm_name = self.vm_name)
-            
-            # Connecting to storage pools
-            volume_pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
-            template_volume_pool = self.virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
-            
-            # Cloning volume from existing one
-            stgvol = template_volume_pool.storageVolLookupByName(self.distribution + '_template.qcow2')
-            print('Creating new volume')
-            stgvol2 = volume_pool.createXMLFrom(self.volume_xml_config, stgvol, 0)
+            for template_volume_name in self.volume_list:
+                with open(VOLUME_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
+                    template = Template(xml_jinja_template.read())
+                volume_name = self.vm_name + template_volume_name
+                volume_xml_config = template.render(volume_name = volume_name)
+                
+                # Connecting to storage pools
+                volume_pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
+                template_volume_pool = self.virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
+                
+                # Cloning volume from existing one
+                stgvol = template_volume_pool.storageVolLookupByName(template_volume_name)
+                print('Creating new volume')
+                stgvol2 = volume_pool.createXMLFrom(volume_xml_config, stgvol, 0)
         return 0
 
 
@@ -74,20 +78,27 @@ class BaseManageVM(object):
         """
         This method creating vm xml for libvirt from jinja2 template.
         """
+        
+        
         with libvirt.open('qemu:///system') as self.virt_conn:
             #Getting all virtuall networks names to nets[] list
             nets = []
-            #
             for n in range(self.interface_offset):
                 nets.append(MANAGMENT_NET_NAME)
             #
             for interface, lan in self.vm['interfaces'].items():
                 nets.append(lan)
+            #
+            volume_location_list = []
+            for template_volume_name in self.volume_list:
+                volume_location_list.append(VOLUME_POOL_DIRECTORY + self.vm_name + template_volume_name)
+            
+            print(volume_location_list)
             
             #Opening and rendering jinja template
             with open(PATH_TO_MODULE + "/xml_configs/" + self.distribution + '_jinja_template.xml') as xml_jinja_template:
                 template = Template(xml_jinja_template.read())
-            config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name), managment_net_name = MANAGMENT_NET_NAME)
+            config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location_list = volume_location_list, managment_net_name = MANAGMENT_NET_NAME)
             self.vm_xml_config = config_string
         return 0
 
@@ -101,6 +112,7 @@ class BaseManageVM(object):
         # Defining vm
         with libvirt.open('qemu:///system') as self.virt_conn:
             print('Creating vm', self.vm_name)
+            print(self.vm_xml_config)
             dom = self.virt_conn.defineXML(self.vm_xml_config)
             # Creating and starting vm
             dom.create()
@@ -135,19 +147,21 @@ class BaseManageVM(object):
         with libvirt.open('qemu:///system') as self.virt_conn:
             # Connect to pool
             pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
-            try:
-                # Getting volume object
-                stgvol = pool.storageVolLookupByName(self.vm_name)
-                
-                # physically remove the storage volume from the underlying
-                # disk media
-                stgvol.wipe()
-                
-                # logically remove the storage volume from the storage pool
-                stgvol.delete()
-                
-            except Exception:
-                print('Volume', self.vm_name, 'is already deleted')
+            for template_volume_name in self.volume_list:
+                volume_name = self.vm_name + template_volume_name
+                try:
+                    # Getting volume object
+                    stgvol = pool.storageVolLookupByName(volume_name)
+                    
+                    # physically remove the storage volume from the underlying
+                    # disk media
+                    stgvol.wipe()
+                    
+                    # logically remove the storage volume from the storage pool
+                    stgvol.delete()
+                    
+                except Exception:
+                    print('Volume', volume_name, 'is already deleted')
         return 0
 
 

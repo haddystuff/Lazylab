@@ -1,5 +1,6 @@
 import yaml
 from lazylab.juniper.juniper_vmx_14_manage_all import JuniperVMX14ManageAll
+from lazylab.juniper.juniper_vmxvcp_18_manage_all import JuniperVMXVCP18ManageAll
 from lazylab.cisco.cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
 from lazylab.config_parser import *
 from zipfile import ZipFile
@@ -64,15 +65,22 @@ def create_device_dict_with_vm_descritpions(lab_name, active_only=True):
                         devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
                     elif (distribution) == 'cisco_iosxr_15':
                         devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
+                    elif (distribution) == 'juniper_vmxvcp_18':
+                        devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
     return devices
 
 
 def check_if_template_image_exist(distribution):
-    if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + distribution + '_template.qcow2'):
-        return 0
-    else:
-        print('No ' + distribution + ' image\nDownloading...')
-        download_template_image(distribution)
+    print(distribution)
+    volume_list = DISTRIBUTION_COMPARE_TO_IMAGE.get(distribution)
+    print(volume_list)
+    for volume in volume_list:
+        if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + volume):
+            return 0
+        else:
+            print('No ' + distribution + ' image\nDownloading...')
+            download_template_image(distribution)
+    return 0
 
 
 def yaml_validate(conf_yaml):
@@ -151,6 +159,8 @@ def create_device_dict_with_archive(config_archive_location):
             devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
         elif (distribution) == 'cisco_iosxr_15':
             devices[lab_name + '_' + vm['name']] = CiscoIOSXR15ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
+        elif (distribution) == 'juniper_vmxvcp_18':
+            devices[lab_name + '_' + vm['name']] = JuniperVMXVCP18ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
     return devices
 
 
