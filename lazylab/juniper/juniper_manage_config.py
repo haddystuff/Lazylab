@@ -23,7 +23,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         
         #connecting to device, loading config and commiting
         try:
-            with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port)) as dev:
+            with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port), console_has_banner=True) as dev:
                 with Config(dev, mode='exclusive') as cu:
                     try:
                         cu.load(self.vm_config, format="text", overwrite=True)
@@ -44,11 +44,13 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         It work realy bad if first password isnt right one, so we neet
         to fix this in future
         """
+        
+        
         self.get_vm_tcp_port()
         for key, password in PASSWORD_LIST:
             try:
                 print (password)
-                with Device(host='127.0.0.1', user='root', password=password, mode='TELNET', port=str(self.port)) as dev:
+                with Device(host='127.0.0.1', user='root', password=password, mode='TELNET', port=str(self.port), console_has_banner=True) as dev:
                     self.vm_config = (dev.cli("show configuration", format='text', warning=False))
                 break
             except exception.ConnectAuthError as err:

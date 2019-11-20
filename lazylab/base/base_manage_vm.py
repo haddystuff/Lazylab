@@ -3,7 +3,10 @@ import libvirt
 import os
 from xml.etree import ElementTree
 from jinja2 import Template
+import logging
 
+
+logger = logging.getLogger('lazylab.base.base_manage_vm')
 
 class BaseManageVM(object):
     def __init__(self, **args):

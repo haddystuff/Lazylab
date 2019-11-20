@@ -1,7 +1,10 @@
 import ftplib
 import libvirt
+import logging
 from jinja2 import Template
 from lazylab.config_parser import *
+
+logger = logging.getLogger('lazylab.downloader')
 
 def download_template_image(distribution):
     with libvirt.open('qemu:///system') as virt_conn:
@@ -10,7 +13,11 @@ def download_template_image(distribution):
             volume_pool = virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
             #if there is no pool, i create it
         except Exception as err:
-            print(err)                # i expect this: libvirtError('virStoragePoolLookupByName()failed', conn=self)
+            # Libvirt has strange error handlings so we need this kind of construction here
+            if err.get_error_code() != 49: # 49 is error message for "storage pool not found"
+                print(err.get_error_message())
+                exit (1)
+            
             #Open jinja2 template file and render it.
             with open(PATH_TO_MODULE + "/xml_configs/" + 'volume_pool_config' + '_jinja_template.xml') as xml_jinja_template:
                 template = Template(xml_jinja_template.read())

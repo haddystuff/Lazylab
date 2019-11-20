@@ -7,11 +7,13 @@ import os
 from lazylab.downloader import download_template_image
 from xml.etree import ElementTree
 import libvirt
-
+import logging
 """
 This file contain business logic functions that called from UI 
 """
 
+
+logger = logging.getLogger('lazylab.tasker')
 
 def create_zip_from_string(archive_path, filename, string):
     """
@@ -19,8 +21,8 @@ def create_zip_from_string(archive_path, filename, string):
     """
     
     
-    config_archive = ZipFile(archive_path, mode="a")                                                 
-    config_archive.writestr(filename, string)                        
+    config_archive = ZipFile(archive_path, mode="a")
+    config_archive.writestr(filename, string)
     config_archive.close() 
     return 0
 
@@ -154,8 +156,9 @@ def create_device_dict_with_archive(config_archive_location):
 
 def deploy_lab(config_archive_location):
     
+    logging.debug('deploying lab')
+
     # Create dictionary of managment objects using function
-    print('Deploying lab')
     devices = create_device_dict_with_archive(config_archive_location)
     
     #Deploying step by step. Methods of managment object is actually self explanitory.
@@ -169,8 +172,10 @@ def deploy_lab(config_archive_location):
 
 
 def delete_lab(lab_name):
-    # Deleting vms obviosly
-    print('Deleting lab')
+    """
+    Deleting vms obviosly
+    """
+    logging.debug('deleting lab')
     
     # generating device dictionary
     devices = create_device_dict_with_vm_descritpions(lab_name, active_only=False)
@@ -183,9 +188,12 @@ def delete_lab(lab_name):
 
 
 def save_lab(old_lab_name, new_lab_name):
-        # Save configs
-        # Works bad sometimes need to work on this more
-        print('savings lab')
+        """ 
+        Save configs
+        Works bad sometimes need to work on this more
+        """
+        logging.debug('savings lab')
+
         # Creating config_dictionary
         config_dictionary = {}
         config_dictionary['lab_name'] = new_lab_name
