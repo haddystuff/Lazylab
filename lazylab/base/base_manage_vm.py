@@ -34,7 +34,9 @@ class BaseManageVM(object):
         self.port = args.get('port', None)
         self.vm_config = args.get('vm_config', None)
         self.vm_name = self.lab_name + '_' + self.vm_short_name
-        self.distribution = self.vm.get('os') + '_' + str(self.vm.get('version'))
+        self.os = self.vm.get('os')
+        self.version = str(self.vm.get('version'))
+        self.distribution = self.os + '_' + self.version
         self.vm_discription = f"#Auto-generated vm with lazylab\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
@@ -42,10 +44,9 @@ class BaseManageVM(object):
                               f"  os: {self.vm.get('os')}\n"\
                               f"  version: {str(self.vm.get('version'))}"
         self.wait_miliseconds = 2000
-        self.interface_offset = INTERFACE_OFFSET_COMPARE_TO_CLASS[type(self).__name__]
-        self.volume_list = DISTRIBUTION_COMPARE_TO_IMAGE.get(self.distribution)
-        print(self.volume_list)
-        print(self.vm)
+        self.interface_offset = INTERFACE_OFFSET[self.distribution]
+        self.volume_list = DISTRIBUTION_IMAGE.get(self.distribution)
+        logging.info(f'initialise new vm object{self.vm}')
 
     def clone_volume(self):
         """
@@ -67,9 +68,11 @@ class BaseManageVM(object):
                 volume_pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
                 template_volume_pool = self.virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
                 
+                # Logging
+                logging.info(f'Creating new volume {volume_name}')
+                
                 # Cloning volume from existing one
                 stgvol = template_volume_pool.storageVolLookupByName(template_volume_name)
-                print('Creating new volume')
                 stgvol2 = volume_pool.createXMLFrom(volume_xml_config, stgvol, 0)
         return 0
 
@@ -91,14 +94,22 @@ class BaseManageVM(object):
             #
             volume_location_list = []
             for template_volume_name in self.volume_list:
-                volume_location_list.append(VOLUME_POOL_DIRECTORY + self.vm_name + template_volume_name)
+                volume_location_list.append(VOLUME_POOL_DIRECTORY + 
+                                            self.vm_name + 
+                                            template_volume_name)
             
-            print(volume_location_list)
+            #Logging
+            logging.info(f'Create volume location list:{volume_location_list}')
             
             #Opening and rendering jinja template
             with open(PATH_TO_MODULE + "/xml_configs/" + self.distribution + '_jinja_template.xml') as xml_jinja_template:
                 template = Template(xml_jinja_template.read())
-            config_string = template.render(vm_name = self.vm_name, description = self.vm_discription, port_number = str(self.port), nets = nets, volume_location_list = volume_location_list, managment_net_name = MANAGMENT_NET_NAME)
+            config_string = template.render(vm_name=self.vm_name, 
+                                            description=self.vm_discription, 
+                                            port_number=str(self.port), 
+                                            nets=nets, 
+                                            volume_location_list=volume_location_list,
+                                            managment_net_name=MANAGMENT_NET_NAME)
             self.vm_xml_config = config_string
         return 0
 
@@ -107,16 +118,27 @@ class BaseManageVM(object):
         """
         This method defines and creates vm from existing xml config.
         """
+        
+        
         #Creating xml
         self.create_xml()
+        
         # Defining vm
         with libvirt.open('qemu:///system') as self.virt_conn:
             print('Creating vm', self.vm_name)
-            print(self.vm_xml_config)
+            
+            # Logging
+            logging.info(f'Creating vm with xml:/n{self.vm_xml_config}')
+            
+            # Setting xml for new libvirt domain 
             dom = self.virt_conn.defineXML(self.vm_xml_config)
+            
             # Creating and starting vm
             dom.create()
-            print('Starting', self.vm_name)
+            
+            # Logging
+            logging.info(f'Starting {self.vm_name}')
+            
         return 0
 
 
@@ -124,18 +146,24 @@ class BaseManageVM(object):
         """
         This method destroys(deletes) existing vm.
         """
+        
+        # Opening Libvirt connection
         with libvirt.open('qemu:///system') as self.virt_conn:
             try:
+                print(self.vm_name)
                 # Connect to domain
                 dom = self.virt_conn.lookupByName(self.vm_name)
+                
                 # Stoping domain
                 try:
                     dom.destroy()
-                except Exception:
+                except Exception as err:
+                    print(err)
                     print('Domain', self.vm_name, 'is already stoped')
                 # Undefine domain
                 dom.undefine()
-            except Exception:
+            except Exception as err:
+                print(err)
                 print('Domain', self.vm_name, 'is already deleted')
         return 0
 
@@ -204,7 +232,7 @@ class BaseManageVM(object):
             vm_object = self.virt_conn.lookupByName(self.vm_name)
             vm_xml_root = ElementTree.fromstring(vm_object.XMLDesc(0))  
             interface_dictionary = {}
-            self.interface_prefix = INTERFACE_PREFIX_COMPARE_TO_CLASS[type(self).__name__]
+            self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
             for interface_number,interface in enumerate(vm_xml_root.iter('interface')): 
                 if interface_number - self.interface_offset < 0:
                     continue

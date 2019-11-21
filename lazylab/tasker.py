@@ -18,7 +18,7 @@ logger = logging.getLogger('lazylab.tasker')
 
 def create_zip_from_string(archive_path, filename, string):
     """
-    this function write new file with string to archive.
+    This function write new file from string to zip archive.
     """
     
     
@@ -53,7 +53,8 @@ def create_device_dict_with_vm_descritpions(lab_name, active_only=True):
             if '#Auto-generated vm with lazylab' in vm_text_description: 
                 
                 # Loading discription in yaml format to lab_parameters variable
-                lab_parameters = yaml.load(vm_text_description, Loader=yaml.FullLoader)
+                lab_parameters = yaml.load(vm_text_description, 
+                                           Loader=yaml.FullLoader)
                 
                 # Getting vm_parameters
                 vm_parameters = lab_parameters.get('vm')
@@ -62,17 +63,17 @@ def create_device_dict_with_vm_descritpions(lab_name, active_only=True):
                 if lab_parameters['lab_name'] == lab_name:
                     distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
                     if (distribution) == 'juniper_vmx_14':
-                        devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
+                        devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name=lab_parameters['lab_name'], vm=vm_parameters)
                     elif (distribution) == 'cisco_iosxr_15':
-                        devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
+                        devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name=lab_parameters['lab_name'], vm=vm_parameters)
                     elif (distribution) == 'juniper_vmxvcp_18':
-                        devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name = lab_parameters['lab_name'], vm = vm_parameters)
+                        devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name=lab_parameters['lab_name'], vm=vm_parameters)
     return devices
 
 
 def check_if_template_image_exist(distribution):
     print(distribution)
-    volume_list = DISTRIBUTION_COMPARE_TO_IMAGE.get(distribution)
+    volume_list = DISTRIBUTION_IMAGE.get(distribution)
     print(volume_list)
     for volume in volume_list:
         if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + volume):
@@ -88,27 +89,27 @@ def yaml_validate(conf_yaml):
     This function check if yaml file has right structure
     """
     #Getting list of vms.
-    list_of_vms = conf_yaml.get("vms")
+    vms_parameters_list = conf_yaml.get("vms")
     
     #Check if vms is actualy existing
-    if list_of_vms == None:
+    if vms_parameters_list == None:
         print("No \"vms\" block in config file")
         exit(1)
     
     #Check if lab name existing
-    if conf_yaml["lab_name"] == None:
+    if conf_yaml.get('lab_name') == None:
         print("No \"lab_name\" block in config file")
         exit(1)
     
     #Check vm one by one.
-    for vm in list_of_vms:
+    for vm_parameters in vms_parameters_list:
         #Check if name of vm is actially exist
-        if vm['name'] == None:
+        if vm_parameters.get('name') == None:
             print("No \"VM Name\" block in config file")
             exit(1)
         
         #Check if vm has right os and version(distibution in this context)
-        distribution = vm.get('os') + '_' + str(vm.get('version'))
+        distribution = vm_parameters.get('os') + '_' + str(vm_parameters.get('version'))
         
         if not(distribution in POSSIBLE_OS_LIST):
             print('Yaml file has bad syntax: wrong os name')
@@ -121,14 +122,19 @@ def yaml_validate(conf_yaml):
 
 def create_device_dict_with_archive(config_archive_location):
     """
-    This function creating dict of manage objects from zip archive. It actially looks like this:
+    This function creating dict of manage objects from zip archive. 
+    It actially looks like this:
     { Testlab_router1: CiscoIOSXR15ManageAll_object
       Testlab_router2: JuniperVMX14ManageAll_object
     }
     """
-    #Opening config file in zip archive, parsing with yaml and sending to conf_yaml valiable
+    
+    
+    # Opening config file in zip archive, parsing with yaml and sending to
+    # conf_yaml valiable
     with ZipFile(config_archive_location, 'r') as lazy_archive:
-        conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), Loader=yaml.FullLoader)
+        conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), 
+                              Loader=yaml.FullLoader)
     
     #Validating syntax and more of conf_yaml
     yaml_validate(conf_yaml)
@@ -136,12 +142,12 @@ def create_device_dict_with_archive(config_archive_location):
     #Setting some valiables
     lab_name = conf_yaml.get("lab_name")
     cur_port = TELNET_STARTING_PORT
-    list_of_vms = conf_yaml.get("vms")
+    vms_parameters_list = conf_yaml.get("vms")
     devices = {}
     
     #Creating vm dictionary called "devices" one by one 
-    for vm in list_of_vms:
-        vm_config_file = vm.get('name') + '.conf'
+    for vm_parameters in vms_parameters_list:
+        vm_config_file = vm_parameters.get('name') + '.conf'
         
         #Getting config of device from zip archive
         try:
@@ -151,16 +157,16 @@ def create_device_dict_with_archive(config_archive_location):
             vm_config = None
         
         cur_port += 1
-        distribution = (vm.get('os') + '_' + str(vm.get('version')))
+        distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
         
         #Creating objects base on its OS
         # need to change way of generating later
         if (distribution) == 'juniper_vmx_14':
-            devices[lab_name + '_' + vm['name']] = JuniperVMX14ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
+            devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name=lab_name, vm=vm_parameters, port=cur_port, vm_config=vm_config)
         elif (distribution) == 'cisco_iosxr_15':
-            devices[lab_name + '_' + vm['name']] = CiscoIOSXR15ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
+            devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name=lab_name, vm=vm_parameters, port=cur_port, vm_config=vm_config)
         elif (distribution) == 'juniper_vmxvcp_18':
-            devices[lab_name + '_' + vm['name']] = JuniperVMXVCP18ManageAll(lab_name = lab_name, vm = vm, port = cur_port, vm_config = vm_config)
+            devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name=lab_name, vm=vm_parameters, port=cur_port, vm_config=vm_config)
     return devices
 
 
@@ -171,7 +177,8 @@ def deploy_lab(config_archive_location):
     # Create dictionary of managment objects using function
     devices = create_device_dict_with_archive(config_archive_location)
     
-    #Deploying step by step. Methods of managment object is actually self explanitory.
+    #Deploying step by step. Methods of managment object is actually 
+    #self explanitory.
     for device in devices:
         devices[device].create_net()
         devices[device].clone_volume()
@@ -185,11 +192,12 @@ def delete_lab(lab_name):
     """
     Deleting vms obviosly
     """
-    logging.debug('deleting lab')
+    logging.info('deleting lab')
     
     # generating device dictionary
-    devices = create_device_dict_with_vm_descritpions(lab_name, active_only=False)
-    
+    devices = create_device_dict_with_vm_descritpions(lab_name, 
+                                                      active_only=False)
+
     # Deleteing vms in dictionary
     for device in devices:
         devices[device].destroy_vm()
@@ -226,9 +234,12 @@ def save_lab(old_lab_name, new_lab_name):
             
             # Getting vm_config to dev_config_str and sending it to archive
             dev_config_str = devices[device].vm_config
-            create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", f"{devices[device].vm_short_name}.conf", dev_config_str)
+            create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy",
+                                   f"{devices[device].vm_short_name}.conf",
+                                   dev_config_str)
             
         # converting config_dictionary to yaml string and sending it to archive
         config_str = yaml.dump(config_dictionary)
-        create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy", "config.yml", config_str)
+        create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy",
+                               "config.yml", config_str)
         return 0

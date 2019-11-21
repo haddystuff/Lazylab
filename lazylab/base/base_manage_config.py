@@ -17,7 +17,7 @@ class BaseManageConfig(ABC):
     def waiting(self):
         #Just waiting method. Its showing animation and sleep as long as needed
         #Soon we will change it to something more intellectual
-        wait_miliseconds = WAITING_TIMERS_COMPARE_TO_CLASS[type(self).__name__]
+        wait_miliseconds = WAITING_TIMERS.get(self.distribution)
         animation = "|/-\\"
         for i in range(wait_miliseconds):
             time.sleep(0.1)
