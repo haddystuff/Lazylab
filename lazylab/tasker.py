@@ -87,21 +87,23 @@ class Tasker(object):
                 if '#Auto-generated vm with lazylab' in vm_text_description: 
                     
                     # Loading discription in yaml format to lab_parameters variable
-                    lab_parameters = yaml.load(vm_text_description, 
+                    vm_description_dict = yaml.load(vm_text_description, 
                                                Loader=yaml.FullLoader)
                     
                     # Getting vm_parameters
-                    vm_parameters = lab_parameters.get('vm')
+                    vm_parameters = vm_description_dict.get('vm')
                     
                     #Generating device dictionary(need to change way of generating later)
-                    if lab_parameters['lab_name'] == lab_name:
-                        distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
-                        if (distribution) == 'juniper_vmx_14':
-                            devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
-                        elif (distribution) == 'cisco_iosxr_15':
-                            devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
-                        elif (distribution) == 'juniper_vmxvcp_18':
-                            devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
+                    if vm_description_dict['lab_name'] == lab_name:
+                        DeviceClass = self.device_class_generator(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
+                        devices[lab_name + '_' + vm_parameters['name']] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters)
+                        # distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
+                        # if (distribution) == 'juniper_vmx_14':
+                            # devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
+                        # elif (distribution) == 'cisco_iosxr_15':
+                            # devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
+                        # elif (distribution) == 'juniper_vmxvcp_18':
+                            # devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
         return devices
 
 
