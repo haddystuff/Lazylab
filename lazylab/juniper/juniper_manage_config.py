@@ -6,6 +6,7 @@ from lazylab.base.base_manage_config import BaseManageConfig
 from lazylab.config_parser import PASSWORD_LIST
 from time import sleep
 
+
 class JuniperManageConfig(BaseManageConfig, ABC):
     """
     This is base juniper manageconfig class, you have to inherit from it when 

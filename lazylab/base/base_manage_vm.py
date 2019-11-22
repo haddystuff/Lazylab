@@ -4,49 +4,50 @@ import os
 from xml.etree import ElementTree
 from jinja2 import Template
 import logging
+from abc import ABC
 
 
 logger = logging.getLogger('lazylab.base.base_manage_vm')
 
-class BaseManageVM(object):
-    def __init__(self, **args):
+class BaseManageVM(ABC):
+    def __init__(self, **kvargs):
         """
         This is the base class you have to inherit from when writing new manage
         objects.
         :param lab_name(str): name of lab.
-        :param vm(dict): dictionary with vm parameters. Neet to read with one
-        from config.yml - file with all of vm parameters and topology. Usually
-        looks like this: {'name': 'router2', 
-                          'os': 'cisco_iosxr',
-                          'version': 15,
-                          'interfaces': {'ge-0/0/0': 'Vxlan1', 
-                                         'ge-0/0/1': 'Vxlan2'}
-                          }
+        :param vm_parameters(dict): dictionary with vm parameters. Neet to read
+        with one from config.yml - file with all of vm parameters and topology.
+        Usually looks like this: {'name': 'router2', 
+                                  'os': 'cisco_iosxr',
+                                  'version': 15,
+                                  'interfaces': {'ge-0/0/0': 'Vxlan1', 
+                                                 'ge-0/0/1': 'Vxlan2'}
+                                  }
         :param port(int): telnet port number, with use to get conlsole to vm.
         :param virt_conn: libvirt connection object.
         :param config_file_object(file): file object of vm config file. If
         there's no config file then value of config_file_object must me "None".
         :return:
         """
-        self.lab_name = args.get('lab_name', 'Unknown_lab')
-        self.vm = args.get('vm', DEFAULT_VM_VARIABLE_VALUE)
-        self.vm_short_name = self.vm.get('name')
-        self.port = args.get('port', None)
-        self.vm_config = args.get('vm_config', None)
+        self.lab_name = kvargs.get('lab_name', 'Unknown_lab')
+        self.vm_parameters = kvargs.get('vm_parameters', DEFAULT_VM_VARIABLE_VALUE)
+        self.vm_short_name = self.vm_parameters.get('name')
+        self.port = kvargs.get('port', None)
+        self.vm_config = kvargs.get('vm_config', None)
         self.vm_name = self.lab_name + '_' + self.vm_short_name
-        self.os = self.vm.get('os')
-        self.version = str(self.vm.get('version'))
+        self.os = self.vm_parameters.get('os')
+        self.version = str(self.vm_parameters.get('version'))
         self.distribution = self.os + '_' + self.version
         self.vm_discription = f"#Auto-generated vm with lazylab\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
-                              f"  name: {self.vm.get('name')}\n"\
-                              f"  os: {self.vm.get('os')}\n"\
-                              f"  version: {str(self.vm.get('version'))}"
+                              f"  name: {self.vm_parameters.get('name')}\n"\
+                              f"  os: {self.vm_parameters.get('os')}\n"\
+                              f"  version: {str(self.vm_parameters.get('version'))}"
         self.wait_miliseconds = 2000
         self.interface_offset = INTERFACE_OFFSET[self.distribution]
         self.volume_list = DISTRIBUTION_IMAGE.get(self.distribution)
-        logging.info(f'initialise new vm object{self.vm}')
+        logging.info(f'initialise new vm object{self.vm_parameters}')
 
     def clone_volume(self):
         """
@@ -89,7 +90,7 @@ class BaseManageVM(object):
             for n in range(self.interface_offset):
                 nets.append(MANAGMENT_NET_NAME)
             #
-            for interface, lan in self.vm['interfaces'].items():
+            for interface, lan in self.vm_parameters['interfaces'].items():
                 nets.append(lan)
             #
             volume_location_list = []
@@ -212,7 +213,7 @@ class BaseManageVM(object):
         This method creates virtual network for vm.
         """
         with libvirt.open('qemu:///system') as self.virt_conn:
-            for interface, net in self.vm.get('interfaces').items():
+            for interface, net in self.vm_parameters.get('interfaces').items():
                 
                 #Opening and rendering jinja virtual network template
                 with open(NET_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
@@ -239,5 +240,5 @@ class BaseManageVM(object):
                 network = next(interface.iter('source')) 
                 interface_key = self.interface_prefix + str(interface_number)
                 interface_dictionary[interface_key] = network.get('network')
-        self.vm['interfaces'] = interface_dictionary
+        self.vm_parameters['interfaces'] = interface_dictionary
         return 0

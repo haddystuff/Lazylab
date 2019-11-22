@@ -1,6 +1,7 @@
 from abc import ABC
 import telnetlib
 from lazylab.base.base_manage_config import BaseManageConfig
+from abc import ABC
 
 class CiscoManageConfig(BaseManageConfig, ABC):
     """
@@ -38,4 +39,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
         except Exception as err:
             print (err)
         return(0)
-        
+    
+    def save_vm(self):
+        print('no save avalible for cisco right now')
+        return 0

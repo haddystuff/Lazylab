@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 import lazylab
 import sys
-from lazylab.tasker import deploy_lab
-from lazylab.tasker import delete_lab
-from lazylab.tasker import save_lab
-from lazylab.config_parser import *
+from lazylab.tasker import Tasker
+from lazylab.config_parser import PATH_TO_MODULE
 import logging
 
 
@@ -44,19 +42,22 @@ def main():
     #Parsing arguments and working with manage objects
     if sys.argv[1] == 'deploy':
         logger.debug('Deploying lab')
-        deploy_lab(config_archive_location)
+        task = Tasker()
+        task.deploy_lab(config_archive_location)
             
     elif sys.argv[1] == 'delete':
         logger.debug('Deleting lab')
         lab_name = sys.argv[2]
-        delete_lab(lab_name)
+        task = Tasker()
+        task.delete_lab(lab_name)
     
     elif (sys.argv[1] == 'save') and (sys.argv[3] == 'as'):
         # Save configs
         logger.debug('saving lab')
         old_lab_name = sys.argv[2]
         new_lab_name = sys.argv[4]
-        save_lab(old_lab_name, new_lab_name)
+        task = Tasker()
+        task.save_lab(old_lab_name, new_lab_name)
     else:
         print('Bad argument :(\nPlease use one of this:\n  1.deploy\n  2.delete')
         exit(1)
