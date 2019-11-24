@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import lazylab
 import sys
-from lazylab.tasker import Tasker
+from lazylab.tasker.tasker import Tasker
 from lazylab.config_parser import PATH_TO_MODULE
 import logging
 

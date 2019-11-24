@@ -2,9 +2,9 @@ import yaml
 from lazylab.cisco.cisco_iosxr_manage_config import CiscoIOSXRManageConfig
 from lazylab.juniper.juniper_vmxvcp_manage_config import JuniperVMXVCPManageConfig
 from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig
-from lazylab.tasker_mappings import OS_TO_CLASS
-from lazylab.tasker_mappings import OS_TO_CLASS_NAME
-from lazylab.tasker_mappings import LAB_ATTRIBUTE_TO_CLASS
+from lazylab.tasker.tasker_mappings import OS_TO_CLASS
+from lazylab.tasker.tasker_mappings import OS_TO_CLASS_NAME
+from lazylab.tasker.tasker_mappings import LAB_ATTRIBUTE_TO_CLASS
 from lazylab.config_parser import *
 from zipfile import ZipFile
 import os
@@ -16,7 +16,7 @@ import logging
 This file contain business logic functions that called from UI 
 """
 
-logger = logging.getLogger('lazylab.tasker')
+logger = logging.getLogger('lazylab.tasker.tasker')
 
 class Tasker(object):
     def __init__(self, **kvargs):
@@ -27,7 +27,7 @@ class Tasker(object):
         
     def device_class_generator(self, **kvargs):
         """
-        This is device_generator for all possible cases
+        This is class generator.
         """
         
         #Unpacking arguments
@@ -69,7 +69,8 @@ class Tasker(object):
 
     def create_device_dict_with_vm_descritpions(self, lab_name, active_only=True):
         """
-        
+        This method create device dictionary from vm descriptions that we
+        created earlier. Also users can create it by hand.
         """
         #Creat diveces dictionary
         devices = {}
@@ -110,14 +111,19 @@ class Tasker(object):
 
     def check_if_template_image_exist(self, distribution):
         """
+        This method check if template image exist, if not it running 
+        download_template_image function wich download image.
         """
-        print(distribution)
+        
+        logging.info('checking if {distribution} template image exist')
         volume_list = DISTRIBUTION_IMAGE.get(distribution)
-        print(volume_list)
+        logging.info(' we need this images: {volume_list}')
         for volume in volume_list:
             if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + volume):
+                logging.info('{volume} image exist')
                 return 0
             else:
+                logging.info('{volume} image dont exist')
                 print('No ' + distribution + ' image\nDownloading...')
                 download_template_image(distribution)
         return 0
@@ -125,8 +131,9 @@ class Tasker(object):
 
     def yaml_validate(self, conf_yaml):
         """
-        This function check if yaml file has right structure
+        This function check if yaml file has right structure and syntax
         """
+        
         #Getting list of vms.
         vms_parameters_list = conf_yaml.get("vms")
         
@@ -186,7 +193,12 @@ class Tasker(object):
         
         #Creating vm dictionary called "devices" one by one 
         for vm_parameters in vms_parameters_list:
+            
+            # Unpacking parameters
             vm_config_file = vm_parameters.get('name') + '.conf'
+            os = vm_parameters.get('os')
+            version = str(vm_parameters.get('version'))
+            vm_name = vm_parameters.get('name')
             
             #Getting config of device from zip archive
             try:
@@ -196,25 +208,26 @@ class Tasker(object):
                 vm_config = None
             
             cur_port += 1
-            distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
+            distribution = (os + '_' + version)
             
             #Creating objects base on its OS
-            DeviceClass = self.device_class_generator(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
-            devices[lab_name + '_' + vm_parameters['name']] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
+            DeviceClass = self.device_class_generator(os=os, version=version)
+            devices[lab_name + '_' + vm_name] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
         return devices
 
 
     def deploy_lab(self, config_archive_location):
         """
+        This method run throgh all small method that helps to deploy lab
         """
         
-        logging.debug('deploying lab')
+        logging.info('deploying lab')
 
         # Create dictionary of managment objects using function
         devices = self.create_device_dict_with_archive(config_archive_location)
         
-        #Deploying step by step. Methods of managment object is actually 
-        #self explanitory.
+        #Deploying every device step by step. Methods of managment object is 
+        #actually self explanitory.
         for device in devices:
             devices[device].create_net()
             devices[device].clone_volume()
@@ -228,6 +241,7 @@ class Tasker(object):
         """
         Deleting vms obviosly
         """
+        
         logging.info('deleting lab')
         
         # generating device dictionary
