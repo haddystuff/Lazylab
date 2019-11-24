@@ -1,7 +1,4 @@
 import yaml
-#from lazylab.juniper.juniper_vmx_14_manage_all import JuniperVMX14ManageAll
-#from lazylab.juniper.juniper_vmxvcp_18_manage_all import JuniperVMXVCP18ManageAll
-#from lazylab.cisco.cisco_iosxr_15_manage_all import CiscoIOSXR15ManageAll
 from lazylab.cisco.cisco_iosxr_manage_config import CiscoIOSXRManageConfig
 from lazylab.juniper.juniper_vmxvcp_manage_config import JuniperVMXVCPManageConfig
 from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig
@@ -30,24 +27,35 @@ class Tasker(object):
         
     def device_class_generator(self, **kvargs):
         """
-        This is device_generator for all situations
+        This is device_generator for all possible cases
         """
         
-        #Unpacking kvargs
+        #Unpacking arguments
         os = kvargs.get('os')
         version = str(kvargs.get('version'))
         config_class = OS_TO_CLASS.get(os)
-        #
-        class_name_part = OS_TO_CLASS_NAME.get(os)
-        class_list = [config_class]
-        class_name = class_name_part + version + 'ManageAll'
-        for attribute in  self.generic_vm_attributes:
-            class_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
-        class_tuple = tuple(class_list)
         
-        print(class_tuple)
-        print(class_name)
-        DeviceClass = type(class_name, class_tuple, {})
+        # Setting first part of new class name
+        class_name_part = OS_TO_CLASS_NAME.get(os)
+        
+        # Setting first class in class parents list
+        class_parents_list = [config_class]
+        
+        # Setting full class name
+        class_name = class_name_part + version + 'ManageAll'
+        
+        # Adding new parents to class parents list depend of a attributes of 
+        # lab
+        for attribute in  self.generic_vm_attributes:
+            class_parents_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
+            
+        # Convert class parents list to tuple
+        class_parents_tuple = tuple(class_parents_list)
+        
+        #Creating device class
+        logging.info('Creating new class called {class_name} with parents {class_parents_tuple}')
+        DeviceClass = type(class_name, class_parents_tuple, {})
+        
         return DeviceClass
         
     def create_zip_from_string(self, archive_path, filename, string):
@@ -97,13 +105,6 @@ class Tasker(object):
                     if vm_description_dict['lab_name'] == lab_name:
                         DeviceClass = self.device_class_generator(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
                         devices[lab_name + '_' + vm_parameters['name']] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters)
-                        # distribution = (vm_parameters.get('os') + '_' + str(vm_parameters.get('version')))
-                        # if (distribution) == 'juniper_vmx_14':
-                            # devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
-                        # elif (distribution) == 'cisco_iosxr_15':
-                            # devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
-                        # elif (distribution) == 'juniper_vmxvcp_18':
-                            # devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name=lab_parameters['lab_name'], vm_parameters=vm_parameters)
         return devices
 
 
@@ -200,13 +201,6 @@ class Tasker(object):
             #Creating objects base on its OS
             DeviceClass = self.device_class_generator(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
             devices[lab_name + '_' + vm_parameters['name']] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
-            # need to change way of generating later
-            #if (distribution) == 'juniper_vmx_14':
-            #    devices[lab_name + '_' + vm_parameters['name']] = JuniperVMX14ManageAll(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
-            #elif (distribution) == 'cisco_iosxr_15':
-            #    devices[lab_name + '_' + vm_parameters['name']] = CiscoIOSXR15ManageAll(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
-            #elif (distribution) == 'juniper_vmxvcp_18':
-            #    devices[lab_name + '_' + vm_parameters['name']] = JuniperVMXVCP18ManageAll(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
         return devices
 
 
