@@ -30,10 +30,10 @@ DISTRIBUTION_IMAGE = {'juniper_vmx_14': ['juniper_vmx_14_template.qcow2'],
                                             'juniper_vmxvcp_18_C_template.qcow2'],
                       'cisco_iosxr_15': ['cisco_iosxr_15_template.qcow2']}
 
-DEFAULT_VM_VARIABLE_VALUE = {'name': 'Unknown_VM', 
-                             'os': 'Unknown_OS',
-                             'version': 0, 
-                             'interfaces': {'ge-0/0/0': 'Unknown_net'}}
+DEFAULT_VM_PARAMETERS = {'name': 'Unknown_VM', 
+                         'os': 'Unknown_OS',
+                         'version': 0, 
+                         'interfaces': {'ge-0/0/0': 'Unknown_net'}}
 
 VOLUME_CONFIG_JINJA_TEMPLATE = PATH_TO_MODULE + "/xml_configs/" + "volume_config_jinja_template.xml"
 NET_CONFIG_JINJA_TEMPLATE = PATH_TO_MODULE + "/xml_configs/" + 'net_config_jinja_template.xml'

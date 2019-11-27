@@ -30,7 +30,7 @@ class BaseManageVM(ABC):
         :return:
         """
         self.lab_name = kvargs.get('lab_name', 'Unknown_lab')
-        self.vm_parameters = kvargs.get('vm_parameters', DEFAULT_VM_VARIABLE_VALUE)
+        self.vm_parameters = kvargs.get('vm_parameters', DEFAULT_VM_PARAMETERS)
         self.vm_short_name = self.vm_parameters.get('name')
         self.port = kvargs.get('port', None)
         self.vm_config = kvargs.get('vm_config', None)
@@ -43,7 +43,7 @@ class BaseManageVM(ABC):
                               f"vm:\n"\
                               f"  name: {self.vm_parameters.get('name')}\n"\
                               f"  os: {self.vm_parameters.get('os')}\n"\
-                              f"  version: {str(self.vm_parameters.get('version'))}"
+                              f"  version: {self.version}"
         self.wait_miliseconds = 2000
         self.interface_offset = INTERFACE_OFFSET[self.distribution]
         self.volume_list = DISTRIBUTION_IMAGE.get(self.distribution)
@@ -120,7 +120,6 @@ class BaseManageVM(ABC):
         This method defines and creates vm from existing xml config.
         """
         
-        
         #Creating xml
         self.create_xml()
         
@@ -150,11 +149,15 @@ class BaseManageVM(ABC):
         
         # Opening Libvirt connection
         with libvirt.open('qemu:///system') as self.virt_conn:
+            print(f'Deleting {self.vm_name}')
+            logging.info(f'Deleting {self.vm_name}')
             try:
-                print(self.vm_name)
                 # Connect to domain
                 dom = self.virt_conn.lookupByName(self.vm_name)
-                
+            except Exception as err:
+                print(err)
+                print('Domain', self.vm_name, 'is already deleted')
+            else:
                 # Stoping domain
                 try:
                     dom.destroy()
@@ -163,9 +166,6 @@ class BaseManageVM(ABC):
                     print('Domain', self.vm_name, 'is already stoped')
                 # Undefine domain
                 dom.undefine()
-            except Exception as err:
-                print(err)
-                print('Domain', self.vm_name, 'is already deleted')
         return 0
 
 
