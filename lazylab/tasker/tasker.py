@@ -62,6 +62,7 @@ class Tasker(object):
         """
         This function write new file from string to zip archive.
         """
+        
         config_archive = ZipFile(archive_path, mode="a")
         config_archive.writestr(filename, string)
         config_archive.close() 
@@ -72,6 +73,7 @@ class Tasker(object):
         This method create device dictionary from vm descriptions that we
         created earlier. Also users can create it by hand.
         """
+        
         #Creat diveces dictionary
         devices = {}
         with libvirt.open('qemu:///system') as virt_conn:
@@ -84,8 +86,11 @@ class Tasker(object):
                 
                 #Trying to get description
                 try:
+                    
                     vm_xml_description = next(vm_xml_root.iter('description'))
+                    
                 except StopIteration:
+                    
                     #going to the next element of loop if no description found
                     continue
                 
