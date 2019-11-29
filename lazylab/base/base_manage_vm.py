@@ -154,16 +154,32 @@ class BaseManageVM(ABC):
             try:
                 # Connect to domain
                 dom = self.virt_conn.lookupByName(self.vm_name)
-            except Exception as err:
-                print(err)
-                print('Domain', self.vm_name, 'is already deleted')
+            except libvirt.libvirtError as err:
+                
+                # checking if libvirt error code is
+                # 42 - VIR_ERR_OPERATION_INVALID
+                if err.get_error_code() != 42:
+                        logging.error(f'{err.get_error_message()}')
+                        exit(1)
+                logging.info(f'{err.get_error_message()}')
+
             else:
                 # Stoping domain
                 try:
+                    
                     dom.destroy()
-                except Exception as err:
-                    print(err)
+                    
+                except libvirt.libvirtError as err:
+                    
+                    # checking if libvirt error code is
+                    # 55 - VIR_ERR_OPERATION_INVALID
+                    if err.get_error_code() != 55:
+                        logging.error(f'{err.get_error_message()}')
+                        exit(1)
+                    
+                    logging.info(f'{err.get_error_message()}')
                     print('Domain', self.vm_name, 'is already stoped')
+                
                 # Undefine domain
                 dom.undefine()
         return 0
@@ -179,18 +195,27 @@ class BaseManageVM(ABC):
             for template_volume_name in self.volume_list:
                 volume_name = self.vm_name + template_volume_name
                 try:
+                    
                     # Getting volume object
                     stgvol = pool.storageVolLookupByName(volume_name)
                     
+                except libvirt.libvirtError as err:
+                    
+                    # checking if libvirt error code is
+                    # 50 - VIR_ERR_NO_STORAGE_VOL
+                    if err.get_error_code() != 50:
+                        logging.error(f'{err.get_error_message()}')
+                        exit(1)
+                    
+                    logging.warning(f'Volume {volume_name} is already deleted')
+                
+                else:
                     # physically remove the storage volume from the underlying
                     # disk media
                     stgvol.wipe()
                     
                     # logically remove the storage volume from the storage pool
                     stgvol.delete()
-                    
-                except Exception:
-                    print('Volume', volume_name, 'is already deleted')
         return 0
 
 
@@ -222,10 +247,25 @@ class BaseManageVM(ABC):
                 
                 #Creating net
                 try:
+                    
                     network = self.virt_conn.networkCreateXML(config_string)
-                except Exception as err:
+                    
+                except libvirt.libvirtError as err:
+                    
+                    # checking if libvirt error code is
+                    # 9 - VIR_ERR_OPERATION_FAILED
+                    if err.get_error_code() != 9:
+                        logging.error(f'{err.get_error_message()}')
+                        exit(1)
+                    
+                    else:
+                        
+                        logging.info(f'{err.get_error_message()}')
+                    
                     continue
-                print(net)
+                    
+                logging.info(f'Create net {net}')
+                
         return 0
         
     def get_vm_networks(self):
