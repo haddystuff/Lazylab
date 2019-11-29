@@ -56,8 +56,8 @@ class BaseManageVM(ABC):
         directory
         """
         
-        
         with libvirt.open('qemu:///system') as self.virt_conn:
+            
             #Opening and rendering jinja template
             for template_volume_name in self.volume_list:
                 with open(VOLUME_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:

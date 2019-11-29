@@ -6,6 +6,7 @@ from lazylab.tasker.tasker_mappings import OS_TO_CLASS
 from lazylab.tasker.tasker_mappings import OS_TO_CLASS_NAME
 from lazylab.tasker.tasker_mappings import LAB_ATTRIBUTE_TO_CLASS
 from lazylab.config_parser import *
+from lazylab.tasker.tasker_helpers import is_port_in_use
 from zipfile import ZipFile
 import os
 from lazylab.downloader import download_template_image
@@ -209,11 +210,17 @@ class Tasker(object):
             try:
                 with ZipFile(config_archive_location, 'r') as lazy_archive:
                     vm_config = lazy_archive.read(vm_config_file).decode("utf-8")
-            except Exception as err:
+            except KeyError as err:
+                logging.info(f'{err}')
                 vm_config = None
             
+            #Take next port to use in vm
             cur_port += 1
-            distribution = (os + '_' + version)
+            while(is_port_in_use(cur_port)):
+                cur_port += 1
+            
+            #Getting a distribution name
+            #distribution = (os + '_' + version)
             
             #Creating objects base on its OS
             DeviceClass = self.device_class_generator(os=os, version=version)
