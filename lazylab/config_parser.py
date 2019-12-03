@@ -51,3 +51,4 @@ CONFIG_FILE_NAME = config['system']['config_file_name']
 VOLUME_POOL_DIRECTORY = config['system']['volume_pool_directory']
 IMAGES_FTP = config['system']['images_ftp']
 PASSWORD_LIST = config.items( "passwords" )
+LAB_CONFIG_PATH = f'{PATH_TO_MODULE}/labs/'

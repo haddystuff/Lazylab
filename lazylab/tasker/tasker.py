@@ -10,6 +10,7 @@ from lazylab.tasker.tasker_helpers import is_port_in_use
 from zipfile import ZipFile
 import os
 from lazylab.downloader import download_template_image
+from lazylab.downloader import download_lab_config_file
 from xml.etree import ElementTree
 import libvirt
 import logging
@@ -21,6 +22,7 @@ logger = logging.getLogger('lazylab.tasker.tasker')
 
 class Tasker(object):
     def __init__(self, **kvargs):
+        # Unpacking
         self.volume_pool_format = kvargs.get('pool_format', 'directory_pool')
         self.generic_vm_attributes = []
         self.generic_vm_attributes.append(self.volume_pool_format)
@@ -144,19 +146,19 @@ class Tasker(object):
         vms_parameters_list = conf_yaml.get("vms")
         
         #Check if vms is actualy existing
-        if vms_parameters_list == None:
+        if vms_parameters_list is None:
             print("No \"vms\" block in config file")
             exit(1)
         
         #Check if lab name existing
-        if conf_yaml.get('lab_name') == None:
+        if conf_yaml.get('lab_name') is None:
             print("No \"lab_name\" block in config file")
             exit(1)
         
         #Check vm one by one.
         for vm_parameters in vms_parameters_list:
             #Check if name of vm is actially exist
-            if vm_parameters.get('name') == None:
+            if vm_parameters.get('name') is None:
                 print("No \"VM Name\" block in config file")
                 exit(1)
             
@@ -172,7 +174,7 @@ class Tasker(object):
         return 0
 
 
-    def create_device_dict_with_archive(self, config_archive_location):
+    def create_device_dict_with_archive(self, config_archive_name):
         """
         This function creating dict of manage objects from zip archive. 
         It actially looks like this:
@@ -180,13 +182,18 @@ class Tasker(object):
           Testlab_router2: JuniperVMX14ManageAll_object
         }
         """
-        
+        # gettign config_archive_location
+        config_archive_location = LAB_CONFIG_PATH + config_archive_name
         
         # Opening config file in zip archive, parsing with yaml and sending to
         # conf_yaml valiable
-        with ZipFile(config_archive_location, 'r') as lazy_archive:
-            conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), 
-                                  Loader=yaml.FullLoader)
+        try:
+            with ZipFile(config_archive_location, 'r') as lazy_archive:
+                conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), 
+                                      Loader=yaml.FullLoader)
+        except FileNotFoundError as err:
+            logging.info(f'{config_archive_location} not found, trying to download from server')
+            download_lab_config_file(config_archive_name)
         
         #Validating syntax and more of conf_yaml
         self.yaml_validate(conf_yaml)
@@ -228,18 +235,18 @@ class Tasker(object):
         return devices
 
 
-    def deploy_lab(self, config_archive_location):
+    def deploy_lab(self, lab_name):
         """
         This method run throgh all small method that helps to deploy lab
         """
         
         logging.info('deploying lab')
-
+        config_archive_name = f'{lab_name}.lazy'
         # Create dictionary of managment objects using function
-        devices = self.create_device_dict_with_archive(config_archive_location)
+        devices = self.create_device_dict_with_archive(config_archive_name)
         
-        #Deploying every device step by step. Methods of managment object is 
-        #actually self explanitory.
+        # Deploying every device step by step. Methods is actually self
+        # explanitory.
         for device in devices:
             devices[device].create_net()
             devices[device].clone_volume()
@@ -273,6 +280,8 @@ class Tasker(object):
             Works bad sometimes need to work on this more
             """
             logging.debug('savings lab')
+            # Setting valiables
+            new_lab_archive_path = f"{LAB_CONFIG_PATH}{new_lab_name}.lazy"
 
             # Creating config_dictionary
             config_dictionary = {}
@@ -296,12 +305,14 @@ class Tasker(object):
                 
                 # Getting vm_config to dev_config_str and sending it to archive
                 dev_config_str = devices[device].vm_config
-                self.create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy",
-                                       f"{devices[device].vm_short_name}.conf",
-                                       dev_config_str)
+                device_config_filename = f"{devices[device].vm_short_name}.conf"
+                
+                self.create_zip_from_string(new_lab_archive_path,
+                                            device_config_filename,
+                                            dev_config_str)
                 
             # converting config_dictionary to yaml string and sending it to archive
             config_str = yaml.dump(config_dictionary)
-            self.create_zip_from_string(f"{PATH_TO_MODULE}/labs/{new_lab_name}.lazy",
-                                   "config.yml", config_str)
+            self.create_zip_from_string(new_lab_archive_path, "config.yml",
+                                        config_str)
             return 0

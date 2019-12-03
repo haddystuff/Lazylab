@@ -33,8 +33,10 @@ def main():
         sys.exit(1)
     elif len(sys.argv) == 2:
         config_archive_location = PATH_TO_MODULE + '/labs/' + 'default' + '.lazy'
+        lab_name = 'default'
     elif len(sys.argv) == 3:
         config_archive_location = PATH_TO_MODULE + '/labs/' + sys.argv[2] + '.lazy'
+        lab_name = sys.argv[2]
     # else:
         # print('Too many arguments, please use:\n  1.deploy\n  2.delete\n as first argument and directory of configs as second')
         # exit(1)
@@ -43,11 +45,10 @@ def main():
     if sys.argv[1] == 'deploy':
         logger.debug('Deploying lab')
         task = Tasker()
-        task.deploy_lab(config_archive_location)
+        task.deploy_lab(lab_name)
             
     elif sys.argv[1] == 'delete':
         logger.debug('Deleting lab')
-        lab_name = sys.argv[2]
         task = Tasker()
         task.delete_lab(lab_name)
     

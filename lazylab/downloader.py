@@ -36,3 +36,7 @@ def download_template_image(distribution):
                     ftp.retrbinary('RETR ' + template_volume_name, f.write)
         volume_pool.refresh()
     return 0
+
+def download_lab_config_file(config_archive_name):
+    print(f'trying to download {config_archive_name}')
+    exit(1)
