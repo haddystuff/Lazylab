@@ -126,14 +126,13 @@ class Tasker(object):
         logging.info('checking if {distribution} template image exist')
         volume_list = DISTRIBUTION_IMAGE.get(distribution)
         logging.info(' we need this images: {volume_list}')
-        for volume in volume_list:
-            if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + volume):
-                logging.info('{volume} image exist')
-                return 0
+        for template_volume_name in volume_list:
+            if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name):
+                logging.info('{template_volume_name} image exist')
             else:
-                logging.info('{volume} image dont exist')
+                logging.info('{template_volume_name} image dont exist')
                 print('No ' + distribution + ' image\nDownloading...')
-                download_template_image(distribution)
+                download_template_image(template_volume_name)
         return 0
 
 
@@ -187,6 +186,7 @@ class Tasker(object):
         
         # Opening config file in zip archive, parsing with yaml and sending to
         # conf_yaml valiable
+        
         try:
             with ZipFile(config_archive_location, 'r') as lazy_archive:
                 conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), 

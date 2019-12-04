@@ -4,6 +4,7 @@ from jnpr.junos.utils.config import Config
 from jnpr.junos import exception
 from lazylab.base.base_manage_config import BaseManageConfig 
 from lazylab.config_parser import PASSWORD_LIST
+import telnetlib
 from time import sleep
 
 
@@ -12,6 +13,19 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     This is base juniper manageconfig class, you have to inherit from it when 
     writing new os manage_config class.
     """
+    def waiting(self):
+        try:
+            #
+            with telnetlib.Telnet("127.0.0.1", 5002, 5) as tn:
+                
+                # just to be sure sending \n\r
+                tn.write(b"\n\r") 
+                tn.read_until(b"login: ", 300)
+
+        except Exception as err:
+            print (err)
+            exit(1)
+        return 0
     
     
     #Configuring method
