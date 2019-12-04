@@ -40,7 +40,8 @@ NET_CONFIG_JINJA_TEMPLATE = PATH_TO_MODULE + "/xml_configs/" + 'net_config_jinja
 TEMPLATE_VOLUME_POOL_NAME = 'lazylab'
 TEMPLATE_VOLUME_POOL_DIRECTORY = PATH_TO_MODULE + '/images/'
 MANAGMENT_NET_NAME = 'default'
-REMOTE_FTP_IMAGE_STORAGE_DIRECTORY_NAME = '/lazylab'
+REMOTE_IMAGE_STORAGE_DIRECTORY_NAME = '/lazylab/images'
+REMOTE_LABS_STORAGE_DIRECTORY_NAME = '/lazylab/labs'
 
 #config constants
 config = configparser.ConfigParser()
@@ -49,6 +50,7 @@ TELNET_STARTING_PORT = int(config['system']['telnet_starting_port'])
 VOLUME_POOL_NAME = config['system']['volume_pool_name']
 CONFIG_FILE_NAME = config['system']['config_file_name']
 VOLUME_POOL_DIRECTORY = config['system']['volume_pool_directory']
-IMAGES_FTP = config['system']['images_ftp']
+IMAGES_SERVER = config['system']['images_server']
+LABS_SERVER = config['system']['labs_server']
 PASSWORD_LIST = config.items( "passwords" )
 LAB_CONFIG_PATH = f'{PATH_TO_MODULE}/labs/'

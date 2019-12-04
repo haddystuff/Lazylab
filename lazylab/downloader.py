@@ -28,8 +28,8 @@ def download_template_image(distribution):
             volume_pool.setAutostart(1)
         
         #downloading images from ftp
-        with ftplib.FTP(IMAGES_FTP, 'anonymous', 'anonymous@domain.com') as ftp:
-            ftp.cwd(REMOTE_FTP_IMAGE_STORAGE_DIRECTORY_NAME)
+        with ftplib.FTP(IMAGES_SERVER, 'anonymous', 'anonymous@domain.com') as ftp:
+            ftp.cwd(REMOTE_IMAGE_STORAGE_DIRECTORY_NAME)
             volume_list = DISTRIBUTION_IMAGE.get(distribution)
             for template_volume_name in volume_list:
                 with open(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name, 'wb') as f:
@@ -39,4 +39,8 @@ def download_template_image(distribution):
 
 def download_lab_config_file(config_archive_name):
     print(f'trying to download {config_archive_name}')
+    with ftplib.FTP(LABS_SERVER, 'anonymous', 'anonymous@domain.com') as ftp:
+        ftp.cwd(REMOTE_LABS_STORAGE_DIRECTORY_NAME)
+        with open(LAB_CONFIG_PATH + config_archive_name, 'wb') as f:
+            ftp.retrbinary('RETR ' + config_archive_name, f.write)
     exit(1)
