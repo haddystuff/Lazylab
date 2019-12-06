@@ -1,4 +1,5 @@
 from lazylab.config_parser import *
+from lazylab.base.base_constants import INTERFACE_OFFSET, INTERFACE_PREFIX, DISTRIBUTION_IMAGE, DEFAULT_VM_PARAMETERS
 import libvirt
 import os
 from xml.etree import ElementTree

@@ -1,7 +1,7 @@
 import time
 from abc import ABC
 import sys
-from lazylab.config_parser import *
+from lazylab.constants import WAITING_TIMER
 import logging
 
 

@@ -26,7 +26,9 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                 tn.write(b"\n\r")
                 
                 # read until we catch login prompt 
-                tn.read_until(b"login: ", 500)
+                output = tn.read_until(b"login: ", 500)
+                
+                logging.info(f'got this output while waiting:\n\n{output}')
 
         except Exception as err:
             

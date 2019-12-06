@@ -1,19 +1,21 @@
-import yaml
 from lazylab.cisco.cisco_iosxr_manage_config import CiscoIOSXRManageConfig
 from lazylab.juniper.juniper_vmxvcp_manage_config import JuniperVMXVCPManageConfig
 from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig
-from lazylab.tasker.tasker_mappings import OS_TO_CLASS
-from lazylab.tasker.tasker_mappings import OS_TO_CLASS_NAME
-from lazylab.tasker.tasker_mappings import LAB_ATTRIBUTE_TO_CLASS
+from lazylab.tasker.tasker_constants import OS_TO_CLASS, POSSIBLE_OS_LIST
+from lazylab.tasker.tasker_constants import OS_TO_CLASS_NAME
+from lazylab.tasker.tasker_constants import LAB_ATTRIBUTE_TO_CLASS
+from lazylab.base.base_manage_vm import BaseManageVM
 from lazylab.config_parser import *
+from lazylab.base.base_constants import DISTRIBUTION_IMAGE
 from lazylab.tasker.tasker_helpers import is_port_in_use
 from zipfile import ZipFile
-import os
 from lazylab.downloader import download_template_image
 from lazylab.downloader import download_lab_config_file
 from xml.etree import ElementTree
 import libvirt
 import logging
+import os
+import yaml
 """
 This file contain business logic functions that called from UI 
 """
@@ -25,10 +27,12 @@ class Tasker():
         self.generic_vms_attributes = []
         
         # Unpacking
-        self.volume_pool_format = kvargs.get('pool_format', 'directory_pool')
+        self.volume_format = kvargs.get('volume_format', 'qcow')
+        self.vm_type = kvargs.get('vm_type', 'persistent')
         
         # Filling generic attributes
-        self.generic_vms_attributes.append(self.volume_pool_format)
+        self.generic_vms_attributes.append(self.volume_format)
+        self.generic_vms_attributes.append(self.vm_type)
         
     def device_class_generator(self, **kvargs):
         """
@@ -55,6 +59,10 @@ class Tasker():
         # lab
         for attribute in  self.generic_vms_attributes:
             class_parents_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
+        
+        # Add BaseManageVM to parents list so we can fallback to default class
+        # if something goes wrong.
+        class_parents_list.append(BaseManageVM)
             
         # Convert class parents list to tuple
         class_parents_tuple = tuple(class_parents_list)
