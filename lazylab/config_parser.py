@@ -12,9 +12,8 @@ POSSIBLE_OS_LIST = ('juniper_vmx_14',
                     'cisco_iosxr_15', 
                     'juniper_vmxvcp_18')
 
-WAITING_TIMERS = {'cisco_iosxr_15': 2000, 
-                  'juniper_vmx_14': 1000,
-                  'juniper_vmxvcp_18': 1500}
+WAITING_TIMER = 2000
+                
 
 INTERFACE_OFFSET = {'cisco_iosxr_15': 1,
                     'juniper_vmx_14': 2,

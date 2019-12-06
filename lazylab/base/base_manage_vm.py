@@ -44,7 +44,6 @@ class BaseManageVM(ABC):
                               f"  name: {self.vm_parameters.get('name')}\n"\
                               f"  os: {self.vm_parameters.get('os')}\n"\
                               f"  version: {self.version}"
-        self.wait_miliseconds = 2000
         self.interface_offset = INTERFACE_OFFSET[self.distribution]
         self.volume_list = DISTRIBUTION_IMAGE.get(self.distribution)
         logging.info(f'initialise new vm object{self.vm_parameters}')
@@ -120,6 +119,9 @@ class BaseManageVM(ABC):
         This method defines and creates vm from existing xml config.
         """
         
+        # Cloning volume
+        self.clone_volume()
+        
         #Creating xml
         self.create_xml()
         
@@ -182,13 +184,18 @@ class BaseManageVM(ABC):
                 
                 # Undefine domain
                 dom.undefine()
+                
+        # Deleting volume
+        self.delete_volume()
+        
         return 0
 
 
     def delete_volume(self):
         """
-        This method deletes volume of existing vm.
+        This method deletes volume of vm.
         """
+        
         with libvirt.open('qemu:///system') as self.virt_conn:
             # Connect to pool
             pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)

@@ -5,8 +5,9 @@ from jnpr.junos import exception
 from lazylab.base.base_manage_config import BaseManageConfig 
 from lazylab.config_parser import PASSWORD_LIST
 import telnetlib
-from time import sleep
+import logging
 
+logger = logging.getLogger('lazylab.juniper.juniper_manage_config')
 
 class JuniperManageConfig(BaseManageConfig, ABC):
     """
@@ -14,17 +15,26 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     writing new os manage_config class.
     """
     def waiting(self):
+        """
+        """
+        
         try:
-            #
-            with telnetlib.Telnet("127.0.0.1", 5002, 5) as tn:
+            # Openning telnet connection
+            with telnetlib.Telnet("127.0.0.1", self.port, 5) as tn:
                 
                 # just to be sure sending \n\r
-                tn.write(b"\n\r") 
-                tn.read_until(b"login: ", 300)
+                tn.write(b"\n\r")
+                
+                # read until we catch login prompt 
+                tn.read_until(b"login: ", 500)
 
         except Exception as err:
-            print (err)
+            
+            # Logging if unexpected error
+            logging.error('get unexpected error while waiting: {err}')
+            
             exit(1)
+            
         return 0
     
     
@@ -70,6 +80,6 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                 break
             except exception.ConnectAuthError as err:
                 print(err)
-                continue
+                print('wrong password')
                 exit(1)
         return 0

@@ -20,13 +20,15 @@ This file contain business logic functions that called from UI
 
 logger = logging.getLogger('lazylab.tasker.tasker')
 
-class Tasker(object):
+class Tasker():
     def __init__(self, **kvargs):
+        self.generic_vms_attributes = []
+        
         # Unpacking
         self.volume_pool_format = kvargs.get('pool_format', 'directory_pool')
-        self.generic_vm_attributes = []
-        self.generic_vm_attributes.append(self.volume_pool_format)
-        pass
+        
+        # Filling generic attributes
+        self.generic_vms_attributes.append(self.volume_pool_format)
         
     def device_class_generator(self, **kvargs):
         """
@@ -36,20 +38,22 @@ class Tasker(object):
         #Unpacking arguments
         os = kvargs.get('os')
         version = str(kvargs.get('version'))
+        
+        #getting config class from OS_TO_CLASS dict
         config_class = OS_TO_CLASS.get(os)
         
         # Setting first part of new class name
-        class_name_part = OS_TO_CLASS_NAME.get(os)
+        # class_name_part = OS_TO_CLASS_NAME.get(os)
         
         # Setting first class in class parents list
         class_parents_list = [config_class]
         
         # Setting full class name
-        class_name = class_name_part + version + 'ManageAll'
+        class_name = OS_TO_CLASS_NAME.get(os) + version + 'ManageAll'
         
         # Adding new parents to class parents list depend of a attributes of 
         # lab
-        for attribute in  self.generic_vm_attributes:
+        for attribute in  self.generic_vms_attributes:
             class_parents_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
             
         # Convert class parents list to tuple
@@ -249,7 +253,6 @@ class Tasker(object):
         # explanitory.
         for device in devices:
             devices[device].create_net()
-            devices[device].clone_volume()
             devices[device].create_vm()
             devices[device].waiting()
             devices[device].configure_vm()
@@ -270,7 +273,6 @@ class Tasker(object):
         # Deleteing vms in dictionary
         for device in devices:
             devices[device].destroy_vm()
-            devices[device].delete_volume()
         return 0
 
 
