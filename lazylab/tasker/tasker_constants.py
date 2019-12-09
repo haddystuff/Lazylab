@@ -14,7 +14,3 @@ LAB_ATTRIBUTE_TO_CLASS = {'qcow': BaseQcowSupport,
 OS_TO_CLASS = {'cisco_iosxr': CiscoIOSXRManageConfig, 
                'juniper_vmx': JuniperVMXManageConfig,
                'juniper_vmxvcp': JuniperVMXVCPManageConfig}
-
-POSSIBLE_OS_LIST = ('juniper_vmx_14',
-                    'cisco_iosxr_15', 
-                    'juniper_vmxvcp_18')

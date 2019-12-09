@@ -1,3 +1,4 @@
+"""Base Cisco IOSXR manageconfig class"""
 from lazylab.cisco.cisco_manage_config import CiscoManageConfig
 from abc import ABC
 

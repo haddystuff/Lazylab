@@ -1,12 +1,13 @@
 from lazylab.cisco.cisco_iosxr_manage_config import CiscoIOSXRManageConfig
 from lazylab.juniper.juniper_vmxvcp_manage_config import JuniperVMXVCPManageConfig
 from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig
-from lazylab.tasker.tasker_constants import OS_TO_CLASS, POSSIBLE_OS_LIST
+from lazylab.tasker.tasker_constants import OS_TO_CLASS
 from lazylab.tasker.tasker_constants import OS_TO_CLASS_NAME
 from lazylab.tasker.tasker_constants import LAB_ATTRIBUTE_TO_CLASS
+from lazylab.constants import POSSIBLE_OS_LIST
 from lazylab.base.base_manage_vm import BaseManageVM
 from lazylab.config_parser import *
-from lazylab.base.base_constants import DISTRIBUTION_IMAGE
+from lazylab.constants import TEMPLATE_IMAGE_LIST
 from lazylab.tasker.tasker_helpers import is_port_in_use
 from zipfile import ZipFile
 from lazylab.downloader import download_template_image
@@ -136,7 +137,7 @@ class Tasker():
         """
         
         logging.info('checking if {distribution} template image exist')
-        volume_list = DISTRIBUTION_IMAGE.get(distribution)
+        volume_list = TEMPLATE_IMAGE_LIST.get(distribution)
         logging.info(' we need this images: {volume_list}')
         for template_volume_name in volume_list:
             if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name):

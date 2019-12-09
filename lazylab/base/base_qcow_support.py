@@ -1,3 +1,4 @@
+"""Base class you have to inherit from when adding qcow2 support"""
 from abc import ABC
 
 

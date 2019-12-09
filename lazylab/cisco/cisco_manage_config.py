@@ -1,3 +1,4 @@
+"""Base Cisco manageconfig class"""
 from abc import ABC
 import telnetlib
 from lazylab.base.base_manage_config import BaseManageConfig
@@ -5,7 +6,8 @@ from abc import ABC
 
 class CiscoManageConfig(BaseManageConfig, ABC):
     """
-    This is base Cisco manageconfig class, you have to inherit from it when writing new os manage_config class.
+    This is base Cisco manageconfig class, you have to inherit from it when
+    writing new os manage_config class.
     """
 
     def configure_vm(self):

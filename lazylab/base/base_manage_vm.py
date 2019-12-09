@@ -1,28 +1,33 @@
+"""Base vm manager"""
 from lazylab.config_parser import *
-from lazylab.base.base_constants import INTERFACE_OFFSET, INTERFACE_PREFIX, DISTRIBUTION_IMAGE, DEFAULT_VM_PARAMETERS
+from lazylab.constants import TEMPLATE_IMAGE_LIST, INTERFACE_PREFIX
+from lazylab.constants import INTERFACE_OFFSET
+from lazylab.base.base_constants import DEFAULT_VM_PARAMETERS
 import libvirt
 import os
-from xml.etree import ElementTree
-from jinja2 import Template
 import logging
+from xml.etree import ElementTree
+from jinja2 import Template, Environment, FileSystemLoader
 from abc import ABC
 
 
 logger = logging.getLogger('lazylab.base.base_manage_vm')
+env = Environment(loader=FileSystemLoader(TEMPLATE_DIRECTORY_PATH))
 
 class BaseManageVM(ABC):
-    def __init__(self, **kvargs):
+    """Base vm manager"""
+    def __init__(self, *args, **kvargs):
         """
         This is the base class you have to inherit from when writing new manage
-        objects.
+        classes.
         :param lab_name(str): name of lab.
         :param vm_parameters(dict): dictionary with vm parameters. Neet to read
         with one from config.yml - file with all of vm parameters and topology.
         Usually looks like this: {'name': 'router2', 
                                   'os': 'cisco_iosxr',
                                   'version': 15,
-                                  'interfaces': {'ge-0/0/0': 'Vxlan1', 
-                                                 'ge-0/0/1': 'Vxlan2'}
+                                  'interfaces': {'ge-0/0/0': 'Vlan1', 
+                                                 'ge-0/0/1': 'Vlan2'}
                                   }
         :param port(int): telnet port number, with use to get conlsole to vm.
         :param virt_conn: libvirt connection object.
@@ -30,24 +35,35 @@ class BaseManageVM(ABC):
         there's no config file then value of config_file_object must me "None".
         :return:
         """
+        
+        
+        # Unpacking kvargs
         self.lab_name = kvargs.get('lab_name', 'Unknown_lab')
         self.vm_parameters = kvargs.get('vm_parameters', DEFAULT_VM_PARAMETERS)
         self.vm_short_name = self.vm_parameters.get('name')
         self.port = kvargs.get('port', None)
         self.vm_config = kvargs.get('vm_config', None)
+        
+        # Setting more variables and unpacking self.vm_parameters
         self.vm_name = self.lab_name + '_' + self.vm_short_name
         self.os = self.vm_parameters.get('os')
         self.version = str(self.vm_parameters.get('version'))
         self.distribution = self.os + '_' + self.version
+        
+        # Getting some variables from constants
+        self.interface_offset = INTERFACE_OFFSET[self.distribution]
+        self.template_volume_list = TEMPLATE_IMAGE_LIST.get(self.distribution)
+        self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
+        
+        # Setting description for vm
         self.vm_discription = f"#Auto-generated vm with lazylab\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
                               f"  name: {self.vm_parameters.get('name')}\n"\
                               f"  os: {self.vm_parameters.get('os')}\n"\
                               f"  version: {self.version}"
-        self.interface_offset = INTERFACE_OFFSET[self.distribution]
-        self.volume_list = DISTRIBUTION_IMAGE.get(self.distribution)
-        logging.info(f'initialise new vm object{self.vm_parameters}')
+                              
+        logging.info(f'initialising new vm object{self.vm_parameters}')
 
     def clone_volume(self):
         """
@@ -58,12 +74,16 @@ class BaseManageVM(ABC):
         
         with libvirt.open('qemu:///system') as self.virt_conn:
             
-            #Opening and rendering jinja template
-            for template_volume_name in self.volume_list:
-                with open(VOLUME_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
-                    template = Template(xml_jinja_template.read())
+            for template_volume_name in self.template_volume_list:
+                
+                # Naming volume
                 volume_name = self.vm_name + template_volume_name
-                volume_xml_config = template.render(volume_name = volume_name)
+                
+                # Getting jinja2 template file
+                template = env.get_template(VOLUME_CONFIG_TEMPLATE_NAME)
+                
+                # Rendering jinja2 template
+                volume_xml_config = template.render(volume_name=volume_name)
                 
                 # Connecting to storage pools
                 volume_pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
@@ -75,50 +95,62 @@ class BaseManageVM(ABC):
                 # Cloning volume from existing one
                 stgvol = template_volume_pool.storageVolLookupByName(template_volume_name)
                 stgvol2 = volume_pool.createXMLFrom(volume_xml_config, stgvol, 0)
+                
         return 0
 
 
     def create_xml(self):
-        """
-        This method creating vm xml for libvirt from jinja2 template.
-        """
-        
+        """This method create vm xml for libvirt from jinja2 template."""
         
         with libvirt.open('qemu:///system') as self.virt_conn:
-            #Getting all virtuall networks names to nets[] list
+            
+            # Creating nets list wich will contain all virtuall networks names
             nets = []
+            
+            # Usually several first interfaces in virtual network devices are
+            # managment or internal use interfaces so we need add first
+            # n = self.interface_offset interfaces to managment net
             for n in range(self.interface_offset):
                 nets.append(MANAGMENT_NET_NAME)
-            #
+            
+            # append usuall interfaces according to vm_parameters 
             for interface, lan in self.vm_parameters['interfaces'].items():
                 nets.append(lan)
-            #
-            volume_location_list = []
-            for template_volume_name in self.volume_list:
-                volume_location_list.append(VOLUME_POOL_DIRECTORY + 
-                                            self.vm_name + 
-                                            template_volume_name)
             
-            #Logging
+            # Creating volume_location_list wich will contain all volume 
+            # locations
+            volume_location_list = []
+            
+            # Adding volume locations to volume_location_list
+            for template_volume_name in self.template_volume_list:
+                
+                volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name + 
+                                  template_volume_name)
+                volume_location_list.append(volume_location)
+            
+            # Logging
             logging.info(f'Create volume location list:{volume_location_list}')
             
-            #Opening and rendering jinja template
-            with open(PATH_TO_MODULE + "/xml_configs/" + self.distribution + '_jinja_template.xml') as xml_jinja_template:
-                template = Template(xml_jinja_template.read())
+            # Opening vm xml jinja2 template
+            vm_xml_name = self.distribution + '_jinja_template.xml'
+            template = env.get_template(vm_xml_name)
+            
+            # Rendering template so we get config for our vm
             config_string = template.render(vm_name=self.vm_name, 
                                             description=self.vm_discription, 
                                             port_number=str(self.port), 
                                             nets=nets, 
                                             volume_location_list=volume_location_list,
                                             managment_net_name=MANAGMENT_NET_NAME)
+                                            
+            # setting vm_xml_config parametr
             self.vm_xml_config = config_string
+            
         return 0
 
 
     def create_vm(self):
-        """
-        This method defines and creates vm from existing xml config.
-        """
+        """This method defines and creates vm from xml config."""
         
         # Cloning volume
         self.clone_volume()
@@ -128,6 +160,7 @@ class BaseManageVM(ABC):
         
         # Defining vm
         with libvirt.open('qemu:///system') as self.virt_conn:
+            
             print('Creating vm', self.vm_name)
             
             # Logging
@@ -136,46 +169,51 @@ class BaseManageVM(ABC):
             # Setting xml for new libvirt domain 
             dom = self.virt_conn.defineXML(self.vm_xml_config)
             
+            # Logging
+            logging.info(f'Creating {self.vm_name}')
+            
             # Creating and starting vm
             dom.create()
             
             # Logging
-            logging.info(f'Starting {self.vm_name}')
+            logging.info(f'{self.vm_name} started')
             
         return 0
 
 
     def destroy_vm(self):
-        """
-        This method destroys(deletes) existing vm.
-        """
+        """This method destroys(deletes) existing vm."""
         
-        # Opening Libvirt connection
         with libvirt.open('qemu:///system') as self.virt_conn:
+            
             print(f'Deleting {self.vm_name}')
             logging.info(f'Deleting {self.vm_name}')
+            
             try:
-                # Connect to domain
+                
+                # Getting domain(vm) object
                 dom = self.virt_conn.lookupByName(self.vm_name)
+                
             except libvirt.libvirtError as err:
                 
                 # checking if libvirt error code is
-                # 42 - VIR_ERR_OPERATION_INVALID
+                # 42 - VIR_ERR_OPERATION_INVALID. If not - exit the script
                 if err.get_error_code() != 42:
-                        logging.error(f'{err.get_error_message()}')
-                        exit(1)
+                    logging.error(f'{err.get_error_message()}')
+                    exit(1)
+                
                 logging.info(f'{err.get_error_message()}')
 
             else:
-                # Stoping domain
+                
+                # Stoping domain if domain exist
                 try:
-                    
                     dom.destroy()
                     
                 except libvirt.libvirtError as err:
                     
                     # checking if libvirt error code is
-                    # 55 - VIR_ERR_OPERATION_INVALID
+                    # 55 - VIR_ERR_OPERATION_INVALID. If not - exit the script
                     if err.get_error_code() != 55:
                         logging.error(f'{err.get_error_message()}')
                         exit(1)
@@ -198,10 +236,15 @@ class BaseManageVM(ABC):
         """
         
         with libvirt.open('qemu:///system') as self.virt_conn:
+            
             # Connect to pool
             pool = self.virt_conn.storagePoolLookupByName(VOLUME_POOL_NAME)
-            for template_volume_name in self.volume_list:
+            
+            for template_volume_name in self.template_volume_list:
+                
+                #Getting volume name
                 volume_name = self.vm_name + template_volume_name
+                
                 try:
                     
                     # Getting volume object
@@ -224,6 +267,7 @@ class BaseManageVM(ABC):
                     
                     # logically remove the storage volume from the storage pool
                     stgvol.delete()
+                    
         return 0
 
 
@@ -231,13 +275,23 @@ class BaseManageVM(ABC):
         """
         This method getting tcp port of console connection of existing vm.
         """
+        
         with libvirt.open('qemu:///system') as self.virt_conn:
-            #Getting tcp port from device xml file with ElementTree
+            
+            # Getting domain(vm) object
             dom = self.virt_conn.lookupByName(self.vm_name)
-            root = ElementTree.fromstring(dom.XMLDesc(0))
-            console = next(root.iter('console'))
+            
+            # Getting root of domain(vm) xml object
+            dom_xml_root = ElementTree.fromstring(dom.XMLDesc(0))
+            
+            # iterating through xml until find 'console' element 
+            console = next(dom_xml_root.iter('console'))
+            
+            # get 'service' value
             tcp_port = console[0].get('service')
+            
         self.port = tcp_port
+        
         return 0
 
 
@@ -246,11 +300,12 @@ class BaseManageVM(ABC):
         This method creates virtual network for vm.
         """
         with libvirt.open('qemu:///system') as self.virt_conn:
+            
+            # iterating through net list
             for interface, net in self.vm_parameters.get('interfaces').items():
                 
                 #Opening and rendering jinja virtual network template
-                with open(NET_CONFIG_JINJA_TEMPLATE) as xml_jinja_template:
-                    template = Template(xml_jinja_template.read())
+                template = env.get_template(NET_CONFIG_TEMPLATE_NAME)
                 config_string = template.render(net_name = net)
                 
                 #Creating net
@@ -270,23 +325,44 @@ class BaseManageVM(ABC):
                         
                         logging.info(f'{err.get_error_message()}')
                     
-                    continue
-                    
-                logging.info(f'Create net {net}')
+                logging.info(f'Created net {net}')
                 
         return 0
         
     def get_vm_networks(self):
+        
         with libvirt.open('qemu:///system') as self.virt_conn:
-            vm_object = self.virt_conn.lookupByName(self.vm_name)
-            vm_xml_root = ElementTree.fromstring(vm_object.XMLDesc(0))  
+            
+            # Getting domain(vm) object
+            dom = self.virt_conn.lookupByName(self.vm_name)
+            
+            # Getting root of domain xml
+            dom_xml_root = ElementTree.fromstring(dom.XMLDesc(0))  
+            
+            # Creating interface_dictionary
             interface_dictionary = {}
-            self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
-            for interface_number,interface in enumerate(vm_xml_root.iter('interface')): 
+            
+            # iterating through interfaces in dom_xml_root also getting indexes
+            for interface_number,interface_xml in enumerate(dom_xml_root.iter('interface')): 
+                
+                # continue if its managment interface
                 if interface_number - self.interface_offset < 0:
                     continue
-                network = next(interface.iter('source')) 
+                
+                # getting the network part of interface_xml
+                network = next(interface_xml.iter('source')) 
+                
+                # setting key string for vm_parameters['interfaces'] dictionary
                 interface_key = self.interface_prefix + str(interface_number)
-                interface_dictionary[interface_key] = network.get('network')
+                
+                # getting connected to interface network name
+                # In KVM thouse networks are bridges
+                network_name = network.get('network', 'unknown_network')
+                
+                # Adding to interface_dictionary new key + value
+                interface_dictionary[interface_key] = network_name
+        
+        # adding to vm_parameters interface dictionary         
         self.vm_parameters['interfaces'] = interface_dictionary
+        
         return 0
