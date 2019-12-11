@@ -1,3 +1,4 @@
+"""Base Juniper manageconfig class"""
 from abc import ABC
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
@@ -7,6 +8,7 @@ from lazylab.config_parser import PASSWORD_LIST
 import telnetlib
 import logging
 
+
 logger = logging.getLogger('lazylab.juniper.juniper_manage_config')
 
 class JuniperManageConfig(BaseManageConfig, ABC):
@@ -15,28 +17,19 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     writing new os manage_config class.
     """
     def waiting(self):
-        """
-        """
-        
-        try:
-            # Openning telnet connection
-            with telnetlib.Telnet("127.0.0.1", self.port, 5) as tn:
-                
-                # just to be sure sending \n\r
-                tn.write(b"\n\r")
-                
-                # read until we catch login prompt 
-                output = tn.read_until(b"login: ", 500)
-                
-                logging.info(f'got this output while waiting:\n\n{output}')
+        """This method waiting until it find "login " in console output"""
 
-        except Exception as err:
+        # Openning telnet connection
+        with telnetlib.Telnet("127.0.0.1", self.port, 5) as tn:
             
-            # Logging if unexpected error
-            logging.error('get unexpected error while waiting: {err}')
+            # just to be sure sending \n\r
+            tn.write(b"\n\r")
             
-            exit(1)
+            # read until we catch login prompt 
+            output = tn.read_until(b"login: ", 400)
             
+            logging.info(f'got this output while waiting:\n\n{output}')
+
         return 0
     
     
@@ -44,22 +37,23 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     def configure_vm(self):
         
         #Checking if config is existing
-        if self.vm_config == None:
-            print("No config file. Using default settings")
+        if not self.vm_config:
+            
+            logging.warning(f'No config file for {self.vm_name}. Skipping configuration step')
+            
             return 0
         
         #connecting to device, loading config and commiting
         try:
             with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port), console_has_banner=True) as dev:
                 with Config(dev, mode='exclusive') as cu:
-                    try:
-                        cu.load(self.vm_config, format="text", overwrite=True)
-                        cu.commit()
-                    except Exception as err:
-                        print(err)
-                        print('Bad config file\n Using default config')
-        except Exception as err:
-            print (err)
+                    
+                    # loading and commiting config
+                    cu.load(self.vm_config, format="text", overwrite=True)
+                    cu.commit()
+        
+        except exception.ConfigLoadError as err:
+            print (type(err))
             exit(1)
         return 0
     

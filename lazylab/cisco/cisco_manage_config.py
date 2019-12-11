@@ -3,6 +3,10 @@ from abc import ABC
 import telnetlib
 from lazylab.base.base_manage_config import BaseManageConfig
 from abc import ABC
+import logging
+
+
+logger = logging.getLogger('lazylab.cisco.cisco_manage_config')
 
 class CiscoManageConfig(BaseManageConfig, ABC):
     """
@@ -11,37 +15,74 @@ class CiscoManageConfig(BaseManageConfig, ABC):
     """
 
     def configure_vm(self):
-        #Need to create new method to check if file exist
-        if self.vm_config == None:
-            print("No config file. Using default settings")
-            return(0)
-        try:
-            #That's a POC of config loading method so we need to rewrite it soon.
-            #Connecting to console using telnet
-            tn = telnetlib.Telnet("127.0.0.1", str(self.port), 5)
+        
+        # check if config exist
+        if not self.vm_config:
             
-            #In this block we send commands one by one and getting results
+            logging.warning(f'No config file for {self.vm_name}. Skipping configuration step')
+            
+            return(0)
+    
+        #Connecting to console using telnet
+        with telnetlib.Telnet("127.0.0.1", str(self.port), 5) as tn:
+        
+            #just in case
             tn.write(b"\n\r") 
-            print(tn.read_until(b"name: ", 5)) 
+            
+            # read until we find "name: " and saving output
+            output = tn.read_until(b"name: ", 5)
+            
+            # logging output
+            logging.info(output.decode('utf-8'))
+            
+            # sending "root\r"
             tn.write(b"root\r") 
-            print(tn.read_until(b"word: ", 5)) 
+            
+            # reading
+            output = tn.read_until(b"word: ", 5)
+            
+            # logging output
+            logging.info(output.decode('utf-8'))
+            
+            # sending
             tn.write(b"root\r") 
-            print(tn.read_until(b"#", 5)) 
+            
+            # reading
+            output = tn.read_until(b"#", 5)
+            
+            # logging output
+            logging.info(output.decode('utf-8'))
+            
+            # sending
             tn.write(b"configure\n") 
-            print(tn.read_until(b"#", 5))
+            
+            # reading
+            output = tn.read_until(b"#", 5)
+            
+            # logging output
+            logging.info(output.decode('utf-8'))
+            
+            # getting config string
+            config = self.vm_config.encode('utf-8')
             
             #sending config encoded in utf-8
-            tn.write(self.vm_config.encode('utf-8'))
+            tn.write(config)
             
-            #Commiting
-            print(tn.read_until(b"[cancel]:", 5))
+            # reading
+            output = tn.read_until(b"[cancel]:", 5)
+            
+            # logging output
+            logging.info(output.decode('utf-8'))
+            
+            # sending comminting commands
             tn.write(b"yes\n") 
             tn.write(b"exit\n") 
             tn.write(b"exit\n") 
-        except Exception as err:
-            print (err)
+            
         return(0)
     
     def save_vm(self):
+        
         print('no save avalible for cisco right now')
+        
         return 0
