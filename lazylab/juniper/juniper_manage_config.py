@@ -16,6 +16,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     This is base juniper manageconfig class, you have to inherit from it when 
     writing new os manage_config class.
     """
+    
     def waiting(self):
         """This method waiting until it find "login " in console output"""
 
@@ -32,9 +33,9 @@ class JuniperManageConfig(BaseManageConfig, ABC):
 
         return 0
     
-    
-    #Configuring method
+
     def configure_vm(self):
+        """Configuring method"""
         
         #Checking if config is existing
         if not self.vm_config:
@@ -46,36 +47,54 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         #connecting to device, loading config and commiting
         try:
             with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port), console_has_banner=True) as dev:
-                with Config(dev, mode='exclusive') as cu:
+                with Config(dev, mode='exclusive') as config:
                     
                     # loading and commiting config
-                    cu.load(self.vm_config, format="text", overwrite=True)
-                    cu.commit()
+                    config.load(self.vm_config, format="text", overwrite=True)
+                    config.commit()
         
         except exception.ConfigLoadError as err:
-            print (type(err))
-            exit(1)
+            
+            logging.warning('bad config for {self.vm_name}')
+            
+        except Exception as err:
+            
+            logging.warning('{err}')
+            
         return 0
     
-    
-    #Save config method is in work, so please don't use it for now.
+
     def get_config_vm(self):
         """
         This method gets self.vm_config(configuration string)
-        It work realy bad if first password isnt right one, so we neet
+        It work realy bad if first password isn't right one, so we neet
         to fix this in future
         """
         
-        
+        # get console port
         self.get_vm_tcp_port()
+        
+        # iterating through password list
         for key, password in PASSWORD_LIST:
             try:
-                print (password)
-                with Device(host='127.0.0.1', user='root', password=password, mode='TELNET', port=str(self.port), console_has_banner=True) as dev:
-                    self.vm_config = (dev.cli("show configuration", format='text', warning=False))
+                with Device(host='127.0.0.1', user='root', password=password, 
+                            mode='TELNET', port=str(self.port),
+                            console_has_banner=True) as dev:
+                                
+                    # getting config
+                    config = dev.cli("show configuration", format='text', warning=False)
+                    
+                    # saving config
+                    self.vm_config = config
+                
+                #if password is correct break from loop    
                 break
+                
             except exception.ConnectAuthError as err:
-                print(err)
-                print('wrong password')
+                
+                logging.error('{err}')
+                print('wrong password, please change password in lazylab.conf')
+                
                 exit(1)
+                
         return 0

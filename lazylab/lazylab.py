@@ -7,7 +7,7 @@ import logging
 
 
 """
-This is pretty simple UI. We need to complitely rewrite it
+This is pretty gabage UI. We need to complitely rewrite it from scratch.
 Its calling tasker functions
 """
 
