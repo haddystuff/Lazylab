@@ -1,10 +1,11 @@
+"""Tasker Class"""
 from lazylab.cisco.cisco_iosxr_manage_config import CiscoIOSXRManageConfig
 from lazylab.juniper.juniper_vmxvcp_manage_config import JuniperVMXVCPManageConfig
 from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig
 from lazylab.tasker.tasker_constants import OS_TO_CLASS
 from lazylab.tasker.tasker_constants import OS_TO_CLASS_NAME
 from lazylab.tasker.tasker_constants import LAB_ATTRIBUTE_TO_CLASS
-from lazylab.constants import POSSIBLE_OS_LIST
+from lazylab.constants import POSSIBLE_OS_LIST, DEVICE_DESRIPTION_MAIN_STR
 from lazylab.base.base_manage_vm import BaseManageVM
 from lazylab.config_parser import *
 from lazylab.constants import TEMPLATE_IMAGE_LIST
@@ -17,14 +18,23 @@ import libvirt
 import logging
 import os
 import yaml
-"""
-This file contain business logic functions that called from UI 
-"""
+
 
 logger = logging.getLogger('lazylab.tasker.tasker')
 
 class Tasker():
+    """Tasker Class"""
     def __init__(self, **kvargs):
+        """
+        This class combine dynamic manager class creation and business logic.
+        All methods of this class should be called from UI.
+        :param volume_format(str): format of volumes in pool. Possible values
+        are 'qcow' for now, but in future we will implement 'LVM' and 'LUN'.
+        :param vm_type(str): persistentcy of vm. Possible values are 
+        'persistent', but in future we will implement 'transient'.
+        """
+        
+        # Creating generic attributes list
         self.generic_vms_attributes = []
         
         # Unpacking
@@ -36,9 +46,7 @@ class Tasker():
         self.generic_vms_attributes.append(self.vm_type)
         
     def device_class_generator(self, **kvargs):
-        """
-        This is class generator.
-        """
+        """This is class generator, wich is just small fabric."""
         
         #Unpacking arguments
         os = kvargs.get('os')
@@ -47,22 +55,18 @@ class Tasker():
         #getting config class from OS_TO_CLASS dict
         config_class = OS_TO_CLASS.get(os)
         
-        # Setting first part of new class name
-        # class_name_part = OS_TO_CLASS_NAME.get(os)
-        
         # Setting first class in class parents list
         class_parents_list = [config_class]
         
         # Setting full class name
         class_name = OS_TO_CLASS_NAME.get(os) + version + 'ManageAll'
         
-        # Adding new parents to class parents list depend of a attributes of 
-        # lab
+        # Adding new parents to class parents list depend of a generic 
+        # attributes of lab
         for attribute in  self.generic_vms_attributes:
             class_parents_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
         
-        # Add BaseManageVM to parents list so we can fallback to default class
-        # if something goes wrong.
+        # Add BaseManageVM to parents list
         class_parents_list.append(BaseManageVM)
             
         # Convert class parents list to tuple
@@ -75,13 +79,12 @@ class Tasker():
         return DeviceClass
         
     def create_zip_from_string(self, archive_path, filename, string):
-        """
-        This function write new file from string to zip archive.
-        """
+        """This method write new file from string to zip archive."""
         
         config_archive = ZipFile(archive_path, mode="a")
         config_archive.writestr(filename, string)
         config_archive.close() 
+        
         return 0
 
     def create_device_dict_with_vm_descritpions(self, lab_name, active_only=True):
@@ -90,8 +93,9 @@ class Tasker():
         created earlier. Also users can create it by hand.
         """
         
-        #Creat diveces dictionary
+        #Create devices dictionary
         devices = {}
+        
         with libvirt.open('qemu:///system') as virt_conn:
             
             #Getting runned vms objects in loop
@@ -114,7 +118,7 @@ class Tasker():
                 vm_text_description = vm_xml_description.text
                 
                 #Checking if vm is auto-generated
-                if '#Auto-generated vm with lazylab' in vm_text_description: 
+                if DEVICE_DESRIPTION_MAIN_STR in vm_text_description: 
                     
                     # Loading discription in yaml format to lab_parameters variable
                     vm_description_dict = yaml.load(vm_text_description, 
@@ -127,6 +131,7 @@ class Tasker():
                     if vm_description_dict['lab_name'] == lab_name:
                         DeviceClass = self.device_class_generator(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
                         devices[lab_name + '_' + vm_parameters['name']] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters)
+        
         return devices
 
 
@@ -286,44 +291,45 @@ class Tasker():
 
 
     def save_lab(self, old_lab_name, new_lab_name):
-            """ 
-            Save configs
-            Works bad sometimes need to work on this more
-            """
-            logging.debug('savings lab')
-            # Setting valiables
-            new_lab_archive_path = f"{LAB_CONFIG_PATH}{new_lab_name}.lazy"
+        """ 
+        Save configs
+        Works bad sometimesl. need to work on this more
+        """
+        logging.debug('savings lab')
+        # Setting valiables
+        new_lab_archive_path = f"{LAB_CONFIG_PATH}{new_lab_name}.lazy"
 
-            # Creating config_dictionary
-            config_dictionary = {}
-            config_dictionary['lab_name'] = new_lab_name
-            config_dictionary['vms'] = []
+        # Creating config_dictionary
+        config_dictionary = {}
+        config_dictionary['lab_name'] = new_lab_name
+        config_dictionary['vms'] = []
+        
+        # Creating device dictionary
+        devices = self.create_device_dict_with_vm_descritpions(old_lab_name)
+        
+        # Ctarting iteration using devices dictionary 
+        for device in devices:
             
-            # Creating device dictionary
-            devices = self.create_device_dict_with_vm_descritpions(old_lab_name)
+            # Find out network connections
+            devices[device].get_vm_networks()
             
-            # Ctarting iteration using devices dictionary 
-            for device in devices:
-                
-                # Find out network connections
-                devices[device].get_vm_networks()
-                
-                # Adding device parameters to config_dictionary 
-                config_dictionary['vms'].append(devices[device].vm)
-                
-                # Find out vm config
-                devices[device].get_config_vm()
-                
-                # Getting vm_config to dev_config_str and sending it to archive
-                dev_config_str = devices[device].vm_config
-                device_config_filename = f"{devices[device].vm_short_name}.conf"
-                
-                self.create_zip_from_string(new_lab_archive_path,
-                                            device_config_filename,
-                                            dev_config_str)
-                
-            # converting config_dictionary to yaml string and sending it to archive
-            config_str = yaml.dump(config_dictionary)
-            self.create_zip_from_string(new_lab_archive_path, "config.yml",
-                                        config_str)
-            return 0
+            # Adding device parameters to config_dictionary 
+            config_dictionary['vms'].append(devices[device].vm)
+            
+            # Find out vm config
+            devices[device].get_config_vm()
+            
+            # Getting vm_config to dev_config_str and sending it to archive
+            dev_config_str = devices[device].vm_config
+            device_config_filename = f"{devices[device].vm_short_name}.conf"
+            
+            self.create_zip_from_string(new_lab_archive_path,
+                                        device_config_filename,
+                                        dev_config_str)
+            
+        # converting config_dictionary to yaml string and sending it to archive
+        config_str = yaml.dump(config_dictionary)
+        self.create_zip_from_string(new_lab_archive_path, "config.yml",
+                                    config_str)
+                                    
+        return 0

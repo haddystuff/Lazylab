@@ -21,13 +21,13 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         """This method waiting until it find "login " in console output"""
 
         # Openning telnet connection
-        with telnetlib.Telnet("127.0.0.1", self.port, 5) as tn:
+        with telnetlib.Telnet('127.0.0.1', self.port, 5) as tn:
             
             # just to be sure sending \n\r
-            tn.write(b"\n\r")
+            tn.write(b'\n\r')
             
             # read until we catch login prompt 
-            output = tn.read_until(b"login: ", 400)
+            output = tn.read_until(b'login: ', 400)
             
             logging.info(f'got this output while waiting:\n\n{output}')
 
@@ -82,7 +82,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                             console_has_banner=True) as dev:
                                 
                     # getting config
-                    config = dev.cli("show configuration", format='text', warning=False)
+                    config = dev.cli('show configuration', format='text', warning=False)
                     
                     # saving config
                     self.vm_config = config

@@ -29,3 +29,5 @@ INTERFACE_PREFIX = {'cisco_iosxr_15': 'ge',
 POSSIBLE_OS_LIST = ('juniper_vmx_14',
                     'cisco_iosxr_15', 
                     'juniper_vmxvcp_18')
+                    
+DEVICE_DESRIPTION_MAIN_STR = '#Auto-generated vm with lazylab'
