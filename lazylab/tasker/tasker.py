@@ -66,8 +66,6 @@ class Tasker():
             DeviceClass = self.managers_classes[class_name]
         
         except KeyError:
-            
-            print('Lool')
         
             # Getting config class from OS_TO_CLASS dict
             config_class = OS_TO_CLASS.get(os)
