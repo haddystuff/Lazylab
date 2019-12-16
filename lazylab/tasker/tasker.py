@@ -106,6 +106,10 @@ class Tasker():
         """
         This method create device dictionary from vm descriptions that we
         created earlier. Also users can create it by hand.
+        It actially looks like this:
+        { Testlab_router1: CiscoIOSXR15ManageAll_object
+          Testlab_router2: JuniperVMX14ManageAll_object
+        }
         """
         
         #Create devices dictionary
@@ -150,28 +154,42 @@ class Tasker():
         return devices
 
 
-    def check_if_template_image_exist(self, distribution):
+    def check_if_template_images_exist(self, distribution):
         """
-        This method check if template image exist, if not it running 
+        This method check if template images exist, if not it running 
         download_template_image function wich download image.
         """
         
         logging.info('checking if {distribution} template image exist')
+        
+        # Getting volume base on distribution
         volume_list = TEMPLATE_IMAGE_LIST.get(distribution)
-        logging.info(' we need this images: {volume_list}')
+        
+        logging.info('we need this images: {volume_list}')
+        
+        # Iterating through volume list
         for template_volume_name in volume_list:
+            
+            # checking file existence
             if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name):
+                
                 logging.info('{template_volume_name} image exist')
+                
             else:
+                
                 logging.info('{template_volume_name} image dont exist')
                 print('No ' + distribution + ' image\nDownloading...')
+                
+                # downloading image
                 download_template_image(template_volume_name)
+                
         return 0
 
 
     def yaml_validate(self, conf_yaml):
         """
-        This function check if yaml file has right structure and syntax
+        This function check if yaml file has right structure and syntax.
+        We need to modify this code so we can check all syntax in yaml file.
         """
         
         #Getting list of vms.
@@ -189,6 +207,7 @@ class Tasker():
         
         #Check vm one by one.
         for vm_parameters in vms_parameters_list:
+            
             #Check if name of vm is actially exist
             if vm_parameters.get('name') is None:
                 print("No \"VM Name\" block in config file")
@@ -202,7 +221,8 @@ class Tasker():
                 exit(1)
             
             #Check if image of os exist on local disk
-            self.check_if_template_image_exist(distribution)
+            self.check_if_template_images_exist(distribution)
+            
         return 0
 
 
@@ -214,30 +234,35 @@ class Tasker():
           Testlab_router2: JuniperVMX14ManageAll_object
         }
         """
+        
         # gettign config_archive_location
         config_archive_location = LAB_CONFIG_PATH + config_archive_name
         
         # Opening config file in zip archive, parsing with yaml and sending to
         # conf_yaml valiable
-        
         try:
+            
             with ZipFile(config_archive_location, 'r') as lazy_archive:
                 conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), 
                                       Loader=yaml.FullLoader)
+                                      
         except FileNotFoundError as err:
+            
             logging.info(f'{config_archive_location} not found, trying to download from server')
+            
+            # Downloading .lazy archive from server
             download_lab_config_file(config_archive_name)
         
-        #Validating syntax and more of conf_yaml
+        # Validating syntax and more of conf_yaml
         self.yaml_validate(conf_yaml)
         
-        #Setting some valiables
+        # Setting vm and lab parameters
         lab_name = conf_yaml.get("lab_name")
         cur_port = TELNET_STARTING_PORT
         vms_parameters_list = conf_yaml.get("vms")
         devices = {}
         
-        #Creating vm dictionary called "devices" one by one 
+        # Creating vm dictionary called "devices" one by one 
         for vm_parameters in vms_parameters_list:
             
             # Unpacking parameters
@@ -246,25 +271,30 @@ class Tasker():
             version = str(vm_parameters.get('version'))
             vm_name = vm_parameters.get('name')
             
-            #Getting config of device from zip archive
+            # Getting config of device from zip archive
             try:
+                
+                # Opening .lazy file
                 with ZipFile(config_archive_location, 'r') as lazy_archive:
+                    
+                    # Decoding from utf-8
                     vm_config = lazy_archive.read(vm_config_file).decode("utf-8")
+                    
             except KeyError as err:
+                
                 logging.info(f'{err}')
+                
                 vm_config = None
             
-            #Take next port to use in vm
+            #Take next port to use as telnet console if it isn't in use
             cur_port += 1
             while(is_port_in_use(cur_port)):
                 cur_port += 1
             
-            #Getting a distribution name
-            #distribution = (os + '_' + version)
-            
             #Creating objects base on its OS
             DeviceClass = self.device_class_generator(os=os, version=version)
             devices[lab_name + '_' + vm_name] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
+        
         return devices
 
 
