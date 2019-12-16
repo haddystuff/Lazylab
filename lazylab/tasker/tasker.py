@@ -37,6 +37,10 @@ class Tasker():
         # Creating generic attributes list
         self.generic_vms_attributes = []
         
+        # Creating managers class list - which is place where already created classes
+        # will be stored. 
+        self.managers_classes = {}
+        
         # Unpacking
         self.volume_format = kvargs.get('volume_format', 'qcow')
         self.vm_type = kvargs.get('vm_type', 'persistent')
@@ -52,29 +56,42 @@ class Tasker():
         os = kvargs.get('os')
         version = str(kvargs.get('version'))
         
-        #getting config class from OS_TO_CLASS dict
-        config_class = OS_TO_CLASS.get(os)
-        
-        # Setting first class in class parents list
-        class_parents_list = [config_class]
-        
         # Setting full class name
         class_name = OS_TO_CLASS_NAME.get(os) + version + 'ManageAll'
         
-        # Adding new parents to class parents list depend of a generic 
-        # attributes of lab
-        for attribute in  self.generic_vms_attributes:
-            class_parents_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
-        
-        # Add BaseManageVM to parents list
-        class_parents_list.append(BaseManageVM)
+        try:
             
-        # Convert class parents list to tuple
-        class_parents_tuple = tuple(class_parents_list)
+            # Get class from managers_classes dict. If there is no class then
+            # create it
+            DeviceClass = self.managers_classes[class_name]
         
-        #Creating device class
-        logging.info('Creating new class called {class_name} with parents {class_parents_tuple}')
-        DeviceClass = type(class_name, class_parents_tuple, {})
+        except KeyError:
+            
+            print('Lool')
+        
+            # Getting config class from OS_TO_CLASS dict
+            config_class = OS_TO_CLASS.get(os)
+            
+            # Setting first class in class parents list
+            class_parents_list = [config_class]
+            
+            # Adding new parents to class parents list depend of a generic 
+            # attributes of lab
+            for attribute in  self.generic_vms_attributes:
+                class_parents_list.append(LAB_ATTRIBUTE_TO_CLASS.get(attribute))
+            
+            # Add BaseManageVM to parents list
+            class_parents_list.append(BaseManageVM)
+                
+            # Convert class parents list to tuple
+            class_parents_tuple = tuple(class_parents_list)
+            
+            # Creating device class
+            logging.info('Creating new class called {class_name} with parents {class_parents_tuple}')
+            DeviceClass = type(class_name, class_parents_tuple, {})
+            
+            # Add new class to managers_classes dictionary
+            self.managers_classes[class_name] = DeviceClass
         
         return DeviceClass
         

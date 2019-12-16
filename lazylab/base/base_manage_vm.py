@@ -56,7 +56,7 @@ class BaseManageVM(ABC):
         self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
         
         # Setting description for vm
-        self.vm_discription = f"{DEVICE_DESRIPTION_MAIN_STR}"\
+        self.vm_discription = f"{DEVICE_DESRIPTION_MAIN_STR}\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
                               f"  name: {self.vm_parameters.get('name')}\n"\

@@ -55,7 +55,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         
         except exception.ConfigLoadError as err:
             
-            logging.warning('bad config for {self.vm_name}')
+            logging.warning(f'bad config for {self.vm_name}')
             
         except Exception as err:
             
