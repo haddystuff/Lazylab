@@ -6,7 +6,7 @@ from abc import ABC
 import logging
 
 
-logger = logging.getLogger('lazylab.cisco.cisco_manage_config')
+logger = logging.getLogger(__name__)
 
 class CiscoManageConfig(BaseManageConfig, ABC):
     """
@@ -19,7 +19,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
         # check if config exist
         if not self.vm_config:
             
-            logging.warning(f'No config file for {self.vm_name}. Skipping configuration step')
+            logger.warning(f'No config file for {self.vm_name}. Skipping configuration step')
             
             return(0)
     
@@ -33,7 +33,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             output = tn.read_until(b"name: ", 5)
             
             # logging output
-            logging.info(output.decode('utf-8'))
+            logger.info(output.decode('utf-8'))
             
             # sending "root\r"
             tn.write(b"root\r") 
@@ -42,7 +42,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             output = tn.read_until(b"word: ", 5)
             
             # logging output
-            logging.info(output.decode('utf-8'))
+            logger.info(output.decode('utf-8'))
             
             # sending
             tn.write(b"root\r") 
@@ -51,7 +51,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             output = tn.read_until(b"#", 5)
             
             # logging output
-            logging.info(output.decode('utf-8'))
+            logger.info(output.decode('utf-8'))
             
             # sending
             tn.write(b"configure\n") 
@@ -60,7 +60,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             output = tn.read_until(b"#", 5)
             
             # logging output
-            logging.info(output.decode('utf-8'))
+            logger.info(output.decode('utf-8'))
             
             # getting config string
             config = self.vm_config.encode('utf-8')
@@ -72,7 +72,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             output = tn.read_until(b"[cancel]:", 5)
             
             # logging output
-            logging.info(output.decode('utf-8'))
+            logger.info(output.decode('utf-8'))
             
             # sending comminting commands
             tn.write(b"yes\n") 

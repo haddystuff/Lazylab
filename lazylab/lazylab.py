@@ -11,23 +11,26 @@ This is pretty gabage UI. We need to complitely rewrite it from scratch.
 Its calling tasker functions
 """
 
-
 # Create a custom logger
-logger = logging.getLogger('lazylab')
+logger = logging.getLogger("lazylab")
+#Set level
+logger.setLevel(logging.DEBUG)
 # Create logger handler
 logger_handler = logging.StreamHandler()
-# set logging level
-logger_handler.setLevel(logging.WARNING)
 # set format
 output_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 logger_handler.setFormatter(output_format)
 # set logger handler
 logger.addHandler(logger_handler)
+    
 
 def main():
+    """ We need to completely rewrite this UI"""
     
-    # We need to completely rewrite this UI
+    logger.info('starting main function')
+    
     # Checking if argument is define and saving name of zip archive from one of arguments
+        
     if len(sys.argv) == 1:
         print('No argument :(\nPlease use one of this:\n  1.deploy\n  2.delete\n 3.save')
         sys.exit(1)

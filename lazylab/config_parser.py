@@ -1,12 +1,15 @@
+"""Config parser"""
 import configparser
+import logging
 from lazylab.constants import *
 
 
-"""
-This is config parser. It parses lazylab.conf file also sets static valiables.
-"""
+logger = logging.getLogger(__name__)
 
-#config constants
+# logging
+logger.info('starting parsing')
+
+# parsing
 config = configparser.ConfigParser()
 config.read(PATH_TO_MODULE + '/lazylab.conf')
 TELNET_STARTING_PORT = int(config['system']['telnet_starting_port'])

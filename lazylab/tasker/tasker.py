@@ -20,7 +20,7 @@ import os
 import yaml
 
 
-logger = logging.getLogger('lazylab.tasker.tasker')
+logger = logging.getLogger(__name__)
 
 class Tasker():
     """Tasker Class"""
@@ -85,7 +85,7 @@ class Tasker():
             class_parents_tuple = tuple(class_parents_list)
             
             # Creating device class
-            logging.info('Creating new class called {class_name} with parents {class_parents_tuple}')
+            logger.info('Creating new class called {class_name} with parents {class_parents_tuple}')
             DeviceClass = type(class_name, class_parents_tuple, {})
             
             # Add new class to managers_classes dictionary
@@ -160,12 +160,12 @@ class Tasker():
         download_template_image function wich download image.
         """
         
-        logging.info('checking if {distribution} template image exist')
+        logger.info('checking if {distribution} template image exist')
         
         # Getting volume base on distribution
         volume_list = TEMPLATE_IMAGE_LIST.get(distribution)
         
-        logging.info('we need this images: {volume_list}')
+        logger.info('we need this images: {volume_list}')
         
         # Iterating through volume list
         for template_volume_name in volume_list:
@@ -173,11 +173,11 @@ class Tasker():
             # checking file existence
             if os.path.isfile(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name):
                 
-                logging.info('{template_volume_name} image exist')
+                logger.info('{template_volume_name} image exist')
                 
             else:
                 
-                logging.info('{template_volume_name} image dont exist')
+                logger.info('{template_volume_name} image dont exist')
                 print('No ' + distribution + ' image\nDownloading...')
                 
                 # downloading image
@@ -248,7 +248,7 @@ class Tasker():
                                       
         except FileNotFoundError as err:
             
-            logging.info(f'{config_archive_location} not found, trying to download from server')
+            logger.info(f'{config_archive_location} not found, trying to download from server')
             
             # Downloading .lazy archive from server
             download_lab_config_file(config_archive_name)
@@ -282,7 +282,7 @@ class Tasker():
                     
             except KeyError as err:
                 
-                logging.info(f'{err}')
+                logger.info(f'{err}')
                 
                 vm_config = None
             
@@ -300,38 +300,44 @@ class Tasker():
 
     def deploy_lab(self, lab_name):
         """
-        This method run throgh all small method that helps to deploy lab
+        This method run throgh all small methods that helps to deploy lab
         """
         
-        logging.info('deploying lab')
+        logger.info('deploying lab')
+        
         config_archive_name = f'{lab_name}.lazy'
+        
         # Create dictionary of managment objects using function
         devices = self.create_device_dict_with_archive(config_archive_name)
         
         # Deploying every device step by step. Methods is actually self
         # explanitory.
         for device in devices:
+            
             devices[device].create_net()
             devices[device].create_vm()
             devices[device].waiting()
             devices[device].configure_vm()
+            
         return 0
 
 
     def delete_lab(self, lab_name):
         """
-        Deleting vms obviosly
+        Deleting vms
         """
         
-        logging.info('deleting lab')
+        logger.info('deleting lab')
         
         # generating device dictionary
         devices = self.create_device_dict_with_vm_descritpions(lab_name, 
-                                                          active_only=False)
+                                                             active_only=False)
 
         # Deleteing vms in dictionary
         for device in devices:
+            
             devices[device].destroy_vm()
+            
         return 0
 
 
@@ -340,8 +346,10 @@ class Tasker():
         Save configs
         Works bad sometimesl. need to work on this more
         """
-        logging.debug('savings lab')
-        # Setting valiables
+        
+        logger.debug('savings lab')
+        
+        # Setting archive path
         new_lab_archive_path = f"{LAB_CONFIG_PATH}{new_lab_name}.lazy"
 
         # Creating config_dictionary

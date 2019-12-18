@@ -18,6 +18,7 @@ class BaseManageConfig(ABC):
     def waiting(self):
         """This method showing animation and sleep as long as needed"""
         
+        logger.info('starting dump waiting method')
         wait_miliseconds = WAITING_TIMER
         animation = "|/-\\"
         for i in range(wait_miliseconds):

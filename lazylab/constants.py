@@ -1,3 +1,4 @@
+"""Constants file"""
 import os
 
 WAITING_TIMER = 2000

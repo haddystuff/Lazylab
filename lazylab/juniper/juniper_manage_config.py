@@ -9,7 +9,7 @@ import telnetlib
 import logging
 
 
-logger = logging.getLogger('lazylab.juniper.juniper_manage_config')
+logger = logging.getLogger("lazylab.juniper.juniper_manage_config")
 
 class JuniperManageConfig(BaseManageConfig, ABC):
     """
@@ -27,9 +27,9 @@ class JuniperManageConfig(BaseManageConfig, ABC):
             tn.write(b'\n\r')
             
             # read until we catch login prompt 
-            output = tn.read_until(b'login: ', 400)
+            output = tn.read_until(b'login: ', 400).decode('utf-8')
             
-            logging.info(f'got this output while waiting:\n\n{output}')
+            logger.info(f'got this output while waiting:\n\n{output}')
 
         return 0
     
@@ -40,7 +40,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         #Checking if config is existing
         if not self.vm_config:
             
-            logging.warning(f'No config file for {self.vm_name}. Skipping configuration step')
+            logger.warning(f'No config file for {self.vm_name}. Skipping configuration step')
             
             return 0
         
@@ -55,11 +55,11 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         
         except exception.ConfigLoadError as err:
             
-            logging.warning(f'bad config for {self.vm_name}')
+            logger.warning(f'bad config for {self.vm_name}')
             
         except Exception as err:
             
-            logging.warning('{err}')
+            logger.warning('{err}')
             
         return 0
     
@@ -92,7 +92,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                 
             except exception.ConnectAuthError as err:
                 
-                logging.error('{err}')
+                logger.error('{err}')
                 print('wrong password, please change password in lazylab.conf')
                 
                 exit(1)

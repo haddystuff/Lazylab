@@ -1,3 +1,4 @@
+"""Tasker constants"""
 from lazylab.cisco.cisco_iosxr_manage_config import CiscoIOSXRManageConfig
 from lazylab.juniper.juniper_vmxvcp_manage_config import JuniperVMXVCPManageConfig
 from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig

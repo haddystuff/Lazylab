@@ -1,10 +1,12 @@
+"""Downloader"""
 import ftplib
 import libvirt
 import logging
 from jinja2 import Template
 from lazylab.config_parser import *
 
-logger = logging.getLogger('lazylab.downloader')
+
+logger = logging.getLogger(__name__)
 
 def download_template_image(template_volume_name):
     with libvirt.open('qemu:///system') as virt_conn:
@@ -17,7 +19,7 @@ def download_template_image(template_volume_name):
             
             # exit if its unexpected error
             if err.get_error_code() != 49: # 49 is error message for "storage pool not found"
-                logging.error(f'{err.get_error_message()}')
+                logger.error(f'{err.get_error_message()}')
                 exit(1)
             
             #Open jinja2 template file and render it.

@@ -11,7 +11,9 @@ from jinja2 import Template, Environment, FileSystemLoader
 from abc import ABC
 
 
-logger = logging.getLogger('lazylab.base.base_manage_vm')
+logger = logging.getLogger(__name__)
+
+# Create enviroment for jinja2
 env = Environment(loader=FileSystemLoader(TEMPLATE_DIRECTORY_PATH))
 
 class BaseManageVM(ABC):
@@ -35,7 +37,6 @@ class BaseManageVM(ABC):
         there's no config file then value of config_file_object must me "None".
         :return:
         """
-        
         
         # Unpacking kvargs
         self.lab_name = kvargs.get('lab_name', 'Unknown_lab')
@@ -63,7 +64,7 @@ class BaseManageVM(ABC):
                               f"  os: {self.vm_parameters.get('os')}\n"\
                               f"  version: {self.version}"
                               
-        logging.info(f'initialising new vm object{self.vm_parameters}')
+        logger.info(f'initialising new vm object{self.vm_parameters}')
 
     def clone_volume(self):
         """
@@ -90,7 +91,7 @@ class BaseManageVM(ABC):
                 template_volume_pool = self.virt_conn.storagePoolLookupByName(TEMPLATE_VOLUME_POOL_NAME)
                 
                 # Logging
-                logging.info(f'Creating new volume {volume_name}')
+                logger.info(f'Creating new volume {volume_name}')
                 
                 # Cloning volume from existing one
                 stgvol = template_volume_pool.storageVolLookupByName(template_volume_name)
@@ -129,7 +130,7 @@ class BaseManageVM(ABC):
                 volume_location_list.append(volume_location)
             
             # Logging
-            logging.info(f'Create volume location list:{volume_location_list}')
+            logger.info(f'Create volume location list:{volume_location_list}')
             
             # Opening vm xml jinja2 template
             vm_xml_name = self.distribution + '_jinja_template.xml'
@@ -164,19 +165,19 @@ class BaseManageVM(ABC):
             print('Creating vm', self.vm_name)
             
             # Logging
-            logging.info(f'Creating vm with xml:/n{self.vm_xml_config}')
+            logger.info(f'Creating vm with xml:/n{self.vm_xml_config}')
             
             # Setting xml for new libvirt domain 
             dom = self.virt_conn.defineXML(self.vm_xml_config)
             
             # Logging
-            logging.info(f'Creating {self.vm_name}')
+            logger.info(f'Creating {self.vm_name}')
             
             # Creating and starting vm
             dom.create()
             
             # Logging
-            logging.info(f'{self.vm_name} started')
+            logger.info(f'{self.vm_name} started')
             
         return 0
 
@@ -187,7 +188,7 @@ class BaseManageVM(ABC):
         with libvirt.open('qemu:///system') as self.virt_conn:
             
             print(f'Deleting {self.vm_name}')
-            logging.info(f'Deleting {self.vm_name}')
+            logger.info(f'Deleting {self.vm_name}')
             
             try:
                 
@@ -199,10 +200,10 @@ class BaseManageVM(ABC):
                 # checking if libvirt error code is
                 # 42 - VIR_ERR_OPERATION_INVALID. If not - exit the script
                 if err.get_error_code() != 42:
-                    logging.error(f'{err.get_error_message()}')
+                    logger.error(f'{err.get_error_message()}')
                     exit(1)
                 
-                logging.info(f'{err.get_error_message()}')
+                logger.info(f'{err.get_error_message()}')
 
             else:
                 
@@ -215,10 +216,10 @@ class BaseManageVM(ABC):
                     # checking if libvirt error code is
                     # 55 - VIR_ERR_OPERATION_INVALID. If not - exit the script
                     if err.get_error_code() != 55:
-                        logging.error(f'{err.get_error_message()}')
+                        logger.error(f'{err.get_error_message()}')
                         exit(1)
                     
-                    logging.info(f'{err.get_error_message()}')
+                    logger.info(f'{err.get_error_message()}')
                     print('Domain', self.vm_name, 'is already stoped')
                 
                 # Undefine domain
@@ -255,10 +256,10 @@ class BaseManageVM(ABC):
                     # checking if libvirt error code is
                     # 50 - VIR_ERR_NO_STORAGE_VOL
                     if err.get_error_code() != 50:
-                        logging.error(f'{err.get_error_message()}')
+                        logger.error(f'{err.get_error_message()}')
                         exit(1)
                     
-                    logging.warning(f'Volume {volume_name} is already deleted')
+                    logger.warning(f'Volume {volume_name} is already deleted')
                 
                 else:
                     # physically remove the storage volume from the underlying
@@ -318,14 +319,14 @@ class BaseManageVM(ABC):
                     # checking if libvirt error code is
                     # 9 - VIR_ERR_OPERATION_FAILED
                     if err.get_error_code() != 9:
-                        logging.error(f'{err.get_error_message()}')
+                        logger.error(f'{err.get_error_message()}')
                         exit(1)
                     
                     else:
                         
-                        logging.info(f'{err.get_error_message()}')
+                        logger.info(f'{err.get_error_message()}')
                     
-                logging.info(f'Created net {net}')
+                logger.info(f'Created net {net}')
                 
         return 0
         
