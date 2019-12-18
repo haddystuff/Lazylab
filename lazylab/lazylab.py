@@ -14,7 +14,7 @@ Its calling tasker functions
 # Create a custom logger
 logger = logging.getLogger("lazylab")
 #Set level
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 # Create logger handler
 logger_handler = logging.StreamHandler()
 # set format
