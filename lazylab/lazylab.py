@@ -22,7 +22,6 @@ output_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 logger_handler.setFormatter(output_format)
 # set logger handler
 logger.addHandler(logger_handler)
-    
 
 def main():
     """ We need to completely rewrite this UI"""

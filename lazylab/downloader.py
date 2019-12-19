@@ -2,11 +2,15 @@
 import ftplib
 import libvirt
 import logging
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader
 from lazylab.config_parser import *
+from lazylab.constants import TEMPLATE_DIRECTORY_PATH, POOL_CONFIG_TEMPLATE_NAME
 
 
 logger = logging.getLogger(__name__)
+
+# Create enviroment for jinja2
+env = Environment(loader=FileSystemLoader(TEMPLATE_DIRECTORY_PATH))
 
 def download_template_image(template_volume_name):
     with libvirt.open('qemu:///system') as virt_conn:
@@ -22,11 +26,22 @@ def download_template_image(template_volume_name):
                 logger.error(f'{err.get_error_message()}')
                 exit(1)
             
-            #Open jinja2 template file and render it.
-            with open(PATH_TO_MODULE + "/xml_configs/" + 'volume_pool_config' + '_jinja_template.xml') as xml_jinja_template:
-                template = Template(xml_jinja_template.read())
+            #Open jinja2 template file and render it. in th future we neet to
+            # change the way of openning jinja file
+            #with open(PATH_TO_MODULE + "/xml_configs/" + 'volume_pool_config' + '_jinja_template.xml') as xml_jinja_template:
+            #    template = Template(xml_jinja_template.read())
+            #
+            #config_string = template.render(pool_name = TEMPLATE_VOLUME_POOL_NAME, volume_pool_path = TEMPLATE_VOLUME_POOL_DIRECTORY, owner_uid = str(os.geteuid()), owner_gid = str(os.getegid()))
             
-            config_string = template.render(pool_name = TEMPLATE_VOLUME_POOL_NAME, volume_pool_path = TEMPLATE_VOLUME_POOL_DIRECTORY, owner_uid = str(os.geteuid()), owner_gid = str(os.getegid()))
+            # Getting jinja2 template file
+            template = env.get_template(POOL_CONFIG_TEMPLATE_NAME)
+                
+            # Rendering jinja2 template
+            config_string = template.render(pool_name = TEMPLATE_VOLUME_POOL_NAME, 
+                                            volume_pool_path = TEMPLATE_VOLUME_POOL_DIRECTORY, 
+                                            owner_uid = str(os.geteuid()), 
+                                            owner_gid = str(os.getegid()))
+            
             # Creating volume pool and adding Autostart
             volume_pool = virt_conn.storagePoolDefineXML(config_string, 0)
             volume_pool.create()

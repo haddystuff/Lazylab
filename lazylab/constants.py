@@ -6,6 +6,7 @@ PATH_TO_MODULE = os.path.dirname(os.path.abspath(__file__))
 VOLUME_CONFIG_TEMPLATE_NAME = "volume_config_jinja_template.xml"
 TEMPLATE_DIRECTORY_PATH = PATH_TO_MODULE + "/xml_configs"
 NET_CONFIG_TEMPLATE_NAME = 'net_config_jinja_template.xml'
+POOL_CONFIG_TEMPLATE_NAME = 'volume_pool_config_jinja_template.xml'
 TEMPLATE_VOLUME_POOL_NAME = 'lazylab'
 TEMPLATE_VOLUME_POOL_DIRECTORY = PATH_TO_MODULE + '/images/'
 MANAGMENT_NET_NAME = 'default'

@@ -7,7 +7,7 @@ import libvirt
 import os
 import logging
 from xml.etree import ElementTree
-from jinja2 import Template, Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from abc import ABC
 
 
@@ -64,7 +64,7 @@ class BaseManageVM(ABC):
                               f"  os: {self.vm_parameters.get('os')}\n"\
                               f"  version: {self.version}"
                               
-        logger.info(f'initialising new vm object{self.vm_parameters}')
+        logger.info(f'initialising new vm object:{self.vm_parameters}')
 
     def clone_volume(self):
         """
