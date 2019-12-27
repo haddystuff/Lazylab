@@ -67,8 +67,8 @@ class JuniperManageConfig(BaseManageConfig, ABC):
     def get_config_vm(self):
         """
         This method gets self.vm_config(configuration string)
-        It work realy bad if first password isn't right one, so we neet
-        to fix this in future
+        It work realy bad if first password isn't right one, so you can make
+        only one try by now. We neet to fix this in future
         """
         
         # get console port
@@ -93,7 +93,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
             except exception.ConnectAuthError as err:
                 
                 logger.error('{err}')
-                print('wrong password, please change password in lazylab.conf')
+                print('wrong password, please change it in lazylab.conf')
                 
                 exit(1)
                 

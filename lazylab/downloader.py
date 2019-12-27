@@ -26,13 +26,6 @@ def download_template_image(template_volume_name):
                 logger.error(f'{err.get_error_message()}')
                 exit(1)
             
-            #Open jinja2 template file and render it. in th future we neet to
-            # change the way of openning jinja file
-            #with open(PATH_TO_MODULE + "/xml_configs/" + 'volume_pool_config' + '_jinja_template.xml') as xml_jinja_template:
-            #    template = Template(xml_jinja_template.read())
-            #
-            #config_string = template.render(pool_name = TEMPLATE_VOLUME_POOL_NAME, volume_pool_path = TEMPLATE_VOLUME_POOL_DIRECTORY, owner_uid = str(os.geteuid()), owner_gid = str(os.getegid()))
-            
             # Getting jinja2 template file
             template = env.get_template(POOL_CONFIG_TEMPLATE_NAME)
                 
@@ -47,7 +40,7 @@ def download_template_image(template_volume_name):
             volume_pool.create()
             volume_pool.setAutostart(1)
         
-        #downloading images from ftp
+        # downloading images from ftp
         with ftplib.FTP(IMAGES_SERVER, 'anonymous', 'anonymous@domain.com') as ftp:
             ftp.cwd(REMOTE_IMAGE_STORAGE_DIRECTORY_NAME)
             with open(TEMPLATE_VOLUME_POOL_DIRECTORY + template_volume_name, 'wb') as f:

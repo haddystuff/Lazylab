@@ -22,7 +22,6 @@ setup(
     author_email="haddystuff@gmail.com",
     url="https://github.com/haddystuff/Lazylab",
 #    classifiers=[
-#        'GNU :: OSI Approved :: Python Software Foundation License'
 #    ]
     include_package_data=True,
     entry_points={
