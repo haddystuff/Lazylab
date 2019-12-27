@@ -40,13 +40,15 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         #Checking if config is existing
         if not self.vm_config:
             
-            logger.warning(f'No config file for {self.vm_name}. Skipping configuration step')
+            logger.warning(f'No config file for {self.vm_name}.'\ 
+                           f'Skipping configuration step')
             
             return 0
         
         #connecting to device, loading config and commiting
         try:
-            with Device(host='127.0.0.1', user='root', mode='telnet', port=str(self.port), console_has_banner=True) as dev:
+            with Device(host='127.0.0.1', user='root', mode='telnet', 
+                        port=str(self.port), console_has_banner=True) as dev:
                 with Config(dev, mode='exclusive') as config:
                     
                     # loading and commiting config
@@ -82,7 +84,8 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                             console_has_banner=True) as dev:
                                 
                     # getting config
-                    config = dev.cli('show configuration', format='text', warning=False)
+                    config = dev.cli('show configuration', format='text', 
+                                     warning=False)
                     
                     # saving config
                     self.vm_config = config

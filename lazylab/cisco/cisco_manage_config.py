@@ -16,12 +16,13 @@ class CiscoManageConfig(BaseManageConfig, ABC):
 
     def configure_vm(self):
         
-        # check if config exist
+        #Checking if config is exist
         if not self.vm_config:
             
-            logger.warning(f'No config file for {self.vm_name}. Skipping configuration step')
-            
-            return(0)
+            logger.warning(f'No config file for {self.vm_name}.'\ 
+                           f'Skipping configuration step')
+                           
+            return 0
     
         #Connecting to console using telnet
         with telnetlib.Telnet("127.0.0.1", str(self.port), 5) as tn:
