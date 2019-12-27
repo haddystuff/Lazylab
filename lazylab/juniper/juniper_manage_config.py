@@ -40,7 +40,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         #Checking if config is existing
         if not self.vm_config:
             
-            logger.warning(f'No config file for {self.vm_name}.'\ 
+            logger.warning(f'No config file for {self.vm_name}.'\
                            f'Skipping configuration step')
             
             return 0

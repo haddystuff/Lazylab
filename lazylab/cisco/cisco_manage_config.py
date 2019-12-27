@@ -19,7 +19,7 @@ class CiscoManageConfig(BaseManageConfig, ABC):
         #Checking if config is exist
         if not self.vm_config:
             
-            logger.warning(f'No config file for {self.vm_name}.'\ 
+            logger.warning(f'No config file for {self.vm_name}.'\
                            f'Skipping configuration step')
                            
             return 0
