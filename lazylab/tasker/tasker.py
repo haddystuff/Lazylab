@@ -5,7 +5,7 @@ from lazylab.juniper.juniper_vmx_manage_config import JuniperVMXManageConfig
 from lazylab.tasker.tasker_constants import OS_TO_CLASS
 from lazylab.tasker.tasker_constants import OS_TO_CLASS_NAME
 from lazylab.tasker.tasker_constants import LAB_ATTRIBUTE_TO_CLASS
-from lazylab.constants import POSSIBLE_OS_LIST, DEVICE_DESRIPTION_MAIN_STR
+from lazylab.constants import POSSIBLE_OS_LIST, DEVICE_DESCRIPTION_MAIN_STR
 from lazylab.base.base_manage_vm import BaseManageVM
 from lazylab.config_parser import *
 from lazylab.constants import TEMPLATE_IMAGE_LIST
@@ -137,7 +137,7 @@ class Tasker():
                 vm_text_description = vm_xml_description.text
                 
                 #Checking if vm is auto-generated
-                if DEVICE_DESRIPTION_MAIN_STR in vm_text_description: 
+                if DEVICE_DESCRIPTION_MAIN_STR in vm_text_description: 
                     
                     # Loading discription in yaml format to lab_parameters variable
                     vm_description_dict = yaml.load(vm_text_description, 

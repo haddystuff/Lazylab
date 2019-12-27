@@ -1,7 +1,7 @@
 """Base vm manager"""
 from lazylab.config_parser import *
 from lazylab.constants import TEMPLATE_IMAGE_LIST, INTERFACE_PREFIX
-from lazylab.constants import INTERFACE_OFFSET, DEVICE_DESRIPTION_MAIN_STR
+from lazylab.constants import INTERFACE_OFFSET, DEVICE_DESCRIPTION_MAIN_STR
 from lazylab.base.base_constants import DEFAULT_VM_PARAMETERS
 import libvirt
 import os
@@ -57,7 +57,7 @@ class BaseManageVM(ABC):
         self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
         
         # Setting description for vm
-        self.vm_discription = f"{DEVICE_DESRIPTION_MAIN_STR}\n"\
+        self.vm_discription = f"{DEVICE_DESCRIPTION_MAIN_STR}\n"\
                               f"lab_name: {self.lab_name}\n"\
                               f"vm:\n"\
                               f"  name: {self.vm_parameters.get('name')}\n"\
