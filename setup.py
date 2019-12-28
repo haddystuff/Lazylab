@@ -1,3 +1,4 @@
+"""setup.py file."""
 from setuptools import setup, find_packages
 
 
@@ -9,17 +10,10 @@ setup(
     name="Lazylab",
     version="0.2",
     packages=find_packages(),
-    #scripts=['lazylab/lazylab.py'],
-
-    # Project uses reStructuredText, so ensure that the docutils get
-    # installed or upgraded on the target machine
-    install_requires=reqs,
-
-    #package_data=True,
-
-    # metadata to display on PyPI
     author="Alex Groshev",
     author_email="haddystuff@gmail.com",
+    description="Network lab deployment automation tool",
+    install_requires=reqs,
     url="https://github.com/haddystuff/Lazylab",
 #    classifiers=[
 #    ]
