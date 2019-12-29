@@ -21,7 +21,7 @@ clone lazylab with
 git clone https://github.com/haddystuff/lazylab
 ```
 
-Suported network devices
+Supported network devices
 ======
 Juniper VMX: 14, 18(vcp only)
 Cisco iosxrv: 5
