@@ -15,7 +15,9 @@ Install
 install libvirt
 
 add your user to libvirt group
-
+```
+sudo usermod -a -G libvirt $(whoami)
+```
 clone lazylab with
 ```
 git clone https://github.com/haddystuff/lazylab
