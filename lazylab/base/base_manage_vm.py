@@ -2,6 +2,7 @@
 from lazylab.config_parser import *
 from lazylab.constants import TEMPLATE_IMAGE_LIST, INTERFACE_PREFIX
 from lazylab.constants import INTERFACE_OFFSET, DEVICE_DESCRIPTION_MAIN_STR
+from lazylab.constants import TEMPLATE_DIRECTORY_PATH
 from lazylab.base.base_constants import DEFAULT_VM_PARAMETERS
 import libvirt
 import os

@@ -1,21 +1,41 @@
 """Config parser"""
 import configparser
 import logging
-from lazylab.constants import *
-
-
-logger = logging.getLogger(__name__)
+from lazylab.constants import DEFAULT_CONFIG_DICTIONARY, PATH_TO_MODULE
 
 # logging
-logger.info('starting parsing')
+logger = logging.getLogger(__name__)
+logger.info('starting parsing config')
 
-# parsing
+# create parser and read file
 config = configparser.ConfigParser()
 config.read(PATH_TO_MODULE + '/lazylab.conf')
-TELNET_STARTING_PORT = int(config['system']['telnet_starting_port'])
-VOLUME_POOL_NAME = config['system']['volume_pool_name']
-CONFIG_FILE_NAME = config['system']['config_file_name']
-VOLUME_POOL_DIRECTORY = config['system']['volume_pool_directory']
-IMAGES_SERVER = config['system']['images_server']
-LABS_SERVER = config['system']['labs_server']
-PASSWORD_LIST = config.items( "passwords" )
+
+# Getting 'system' section from config file as dict
+try:
+    system_config = config['system']
+    
+except KeyError:
+    logger.warning('No \'system\' section in config file, using default dict')
+    system_config = DEFAULT_CONFIG_DICTIONARY
+
+# Telnet port to start from
+TELNET_STARTING_PORT = int(system_config.get('telnet_starting_port', '5000'))
+
+# Volume pool name
+VOLUME_POOL_NAME = system_config.get('volume_pool_name', 'default')
+
+# Config file name
+CONFIG_FILE_NAME = system_config.get('config_file_name', 'config.yml')
+
+# Volume pool dir
+VOLUME_POOL_DIRECTORY = system_config.get('volume_pool_directory', '/var/lib/libvirt/images/')
+
+# image server
+IMAGES_SERVER = system_config.get('images_server', 'afs323dadg4.hopto.org')
+
+# Server with lab config gile to download
+LABS_SERVER = system_config.get('labs_server', 'afs323dadg4.hopto.org')
+
+# list of passwords
+PASSWORD_LIST = config.items('passwords', ['Lazylab1'])

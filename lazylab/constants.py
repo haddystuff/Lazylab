@@ -63,3 +63,11 @@ POSSIBLE_OS_LIST = ('juniper_vmx_14',
 
 # First string in description should be
 DEVICE_DESCRIPTION_MAIN_STR = '#Auto-generated vm with lazylab'
+
+# Default config dictionary
+DEFAULT_CONFIG_DICTIONARY = {'telnet_starting_port': '5000',
+                             'volume_pool_name': 'default',
+                             'config_file_name': 'config.yml',
+                             'volume_pool_directory': '/var/lib/libvirt/images/',
+                             'images_server': 'afs323dadg4.hopto.org',
+                             'labs_server': 'afs323dadg4.hopto.org'}
