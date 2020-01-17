@@ -6,6 +6,7 @@ from lazylab.tasker.tasker_constants import OS_TO_CLASS
 from lazylab.tasker.tasker_constants import OS_TO_CLASS_NAME
 from lazylab.tasker.tasker_constants import LAB_ATTRIBUTE_TO_CLASS
 from lazylab.constants import POSSIBLE_OS_LIST, DEVICE_DESCRIPTION_MAIN_STR
+from lazylab.constants import LAB_CONFIG_PATH, TEMPLATE_VOLUME_POOL_DIRECTORY
 from lazylab.base.base_manage_vm import BaseManageVM
 from lazylab.config_parser import *
 from lazylab.constants import TEMPLATE_IMAGE_LIST
@@ -341,7 +342,7 @@ class Tasker():
         return 0
 
 
-    def save_lab(self, old_lab_name, new_lab_name):
+    def save_lab(self, old_lab_name, new_lab_name, saved_lab_path = LAB_CONFIG_PATH):
         """ 
         Save configs
         Works bad sometimesl. need to work on this more
@@ -350,7 +351,7 @@ class Tasker():
         logger.debug('savings lab')
         
         # Setting archive path
-        new_lab_archive_path = f"{LAB_CONFIG_PATH}{new_lab_name}.lazy"
+        new_lab_archive_path = f"{saved_lab_path}{new_lab_name}.lazy"
 
         # Creating config_dictionary
         config_dictionary = {}
@@ -367,7 +368,7 @@ class Tasker():
             devices[device].get_vm_networks()
             
             # Adding device parameters to config_dictionary 
-            config_dictionary['vms'].append(devices[device].vm)
+            config_dictionary['vms'].append(devices[device].vm_parameters)
             
             # Find out vm config
             devices[device].get_config_vm()

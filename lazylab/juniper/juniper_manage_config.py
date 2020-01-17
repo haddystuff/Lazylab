@@ -83,12 +83,18 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                             mode='TELNET', port=str(self.port),
                             console_has_banner=True) as dev:
                                 
-                    # getting config
-                    config = dev.cli('show configuration', format='text', 
-                                     warning=False)
-                    
+                    # Getting config
+                    candidate_config = dev.cli('show configuration', 
+                                               format='text', 
+                                               warning=False)
+                    # Second way to get config
+                    #candidate_config = dev.rpc.get_config(normalize=False, 
+                    #                                      options={'inherit':'inherit',
+                    #                                               'database':'committed',
+                    #                                               'format':'text'}).text
+
                     # saving config
-                    self.vm_config = config
+                    self.vm_config = self.config_purifier(candidate_config)
                 
                 #if password is correct break from loop    
                 break
@@ -101,3 +107,22 @@ class JuniperManageConfig(BaseManageConfig, ABC):
                 exit(1)
                 
         return 0
+        
+    def config_purifier(self, candidate_config):
+        """
+        This method purify config from unnecessary string:
+        "## Last commit: 2020-01-17 09:58:44 UTC by root"
+        This method is Juniper specific.
+        :config(str) - config string to purify
+        """
+        
+        # Creating empty config list
+        config = []
+        
+        # Filter lines in candidate list
+        for line in candidate_config.splitlines():
+            if '## Last commit:' not in line:
+                config.append(line)
+        config = '\n'.join(config)
+        
+        return config
