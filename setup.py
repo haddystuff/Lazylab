@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fs:
 setup(
     name="Lazylab",
     version="0.2",
-    packages=find_packages(),
+    packages=find_packages(exclude=("test*",)),
     author="Alex Groshev",
     author_email="haddystuff@gmail.com",
     description="Network lab deployment automation tool",
