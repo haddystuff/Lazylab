@@ -6,7 +6,7 @@ import os
 from lazylab.tasker.tasker import Tasker
 from lazylab.constants import LAB_CONFIG_PATH, PATH_TO_MODULE
 
-class GlobalTest(unittest.TestCase):
+class DeployAndSave(unittest.TestCase):
     def setUp(self):
         self.lab_name = 'Juniper_vmx14'
         task = Tasker()
@@ -23,13 +23,12 @@ class GlobalTest(unittest.TestCase):
         with zipfile.ZipFile(path1, 'r') as archive1, zipfile.ZipFile(path2, 'r') as archive2: 
             filelist1 = archive1.namelist() 
             filelist2 = archive2.namelist() 
-            flag = True 
-            for filename1, filename2 in zip(filelist1, filelist2): 
-                with archive1.open(filename1) as file1, archive2.open(filename2) as file2: 
+            flag = (filelist1 == filelist2)
+            for filename in filelist1: 
+                with archive1.open(filename) as file1, archive2.open(filename) as file2: 
                     filestring1 = file1.read() 
                     filestring2 = file2.read() 
                     flag = flag and (filestring1 == filestring2) 
-
         self.assertTrue(flag)
         os.remove(path2)
         

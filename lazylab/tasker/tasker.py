@@ -38,8 +38,8 @@ class Tasker():
         # Creating generic attributes list
         self.generic_vms_attributes = []
         
-        # Creating managers class list - which is place where already created classes
-        # will be stored. 
+        # Creating managers class list - which is place where already created
+        # classes will be stored. 
         self.managers_classes = {}
         
         # Unpacking
@@ -150,7 +150,7 @@ class Tasker():
                     #Generating device dictionary(need to change way of generating later)
                     if vm_description_dict['lab_name'] == lab_name:
                         DeviceClass = self.device_class_generator(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
-                        devices[lab_name + '_' + vm_parameters['name']] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters)
+                        devices[lab_name + '_' + vm_parameters.get('name')] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters)
         
         return devices
 
