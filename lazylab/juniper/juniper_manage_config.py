@@ -66,7 +66,7 @@ class JuniperManageConfig(BaseManageConfig, ABC):
         return 0
     
 
-    def get_config_vm(self):
+    def get_vm_config(self):
         """
         This method gets self.vm_config(configuration string)
         It work realy bad if first password isn't right one, so you can make

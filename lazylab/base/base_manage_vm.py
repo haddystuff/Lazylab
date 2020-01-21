@@ -200,7 +200,7 @@ class BaseManageVM(ABC):
             except libvirt.libvirtError as err:
                 
                 # checking if libvirt error code is
-                # 42 - VIR_ERR_OPERATION_INVALID. If not - exit the script
+                # 42 - VIR_ERR_NO_DOMAIN. If not - exit the script
                 if err.get_error_code() != 42:
                     logger.error(f'{err.get_error_message()}')
                     exit(1)

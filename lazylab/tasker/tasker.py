@@ -103,7 +103,7 @@ class Tasker():
         
         return 0
 
-    def create_device_dict_with_vm_descritpions(self, lab_name, active_only=True):
+    def create_device_dict_with_vm_description(self, lab_name, active_only=True):
         """
         This method create device dictionary from vm descriptions that we
         created earlier. Also users can create it by hand.
@@ -194,16 +194,16 @@ class Tasker():
         """
         
         #Getting list of vms.
-        vms_parameters_list = conf_yaml.get("vms")
+        vms_parameters_list = conf_yaml.get('vms')
         
         #Check if vms is actualy existing
         if vms_parameters_list is None:
-            print("No \"vms\" block in config file")
+            print('No \"vms\" block in config file')
             exit(1)
         
         #Check if lab name existing
         if conf_yaml.get('lab_name') is None:
-            print("No \"lab_name\" block in config file")
+            print('No \"lab_name\" block in config file')
             exit(1)
         
         #Check vm one by one.
@@ -211,7 +211,7 @@ class Tasker():
             
             #Check if name of vm is actially exist
             if vm_parameters.get('name') is None:
-                print("No \"VM Name\" block in config file")
+                print('No \"VM Name\" block in config file')
                 exit(1)
             
             #Check if vm has right os and version(distibution in this context)
@@ -258,9 +258,9 @@ class Tasker():
         self.yaml_validate(conf_yaml)
         
         # Setting vm and lab parameters
-        lab_name = conf_yaml.get("lab_name")
+        lab_name = conf_yaml.get('lab_name')
         cur_port = TELNET_STARTING_PORT
-        vms_parameters_list = conf_yaml.get("vms")
+        vms_parameters_list = conf_yaml.get('vms')
         devices = {}
         
         # Creating vm dictionary called "devices" one by one 
@@ -279,7 +279,7 @@ class Tasker():
                 with ZipFile(config_archive_location, 'r') as lazy_archive:
                     
                     # Decoding from utf-8
-                    vm_config = lazy_archive.read(vm_config_file).decode("utf-8")
+                    vm_config = lazy_archive.read(vm_config_file).decode('utf-8')
                     
             except KeyError as err:
                 
@@ -294,7 +294,10 @@ class Tasker():
             
             #Creating objects base on its OS
             DeviceClass = self.device_class_generator(os=os, version=version)
-            devices[lab_name + '_' + vm_name] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port, vm_config=vm_config)
+            devices[f'{lab_name}_{vm_name}'] = DeviceClass(lab_name=lab_name, 
+                                                           vm_parameters=vm_parameters,
+                                                           port=cur_port, 
+                                                           vm_config=vm_config)
         
         return devices
 
@@ -331,7 +334,7 @@ class Tasker():
         logger.info('deleting lab')
         
         # generating device dictionary
-        devices = self.create_device_dict_with_vm_descritpions(lab_name, 
+        devices = self.create_device_dict_with_vm_description(lab_name, 
                                                              active_only=False)
 
         # Deleteing vms in dictionary
@@ -351,7 +354,7 @@ class Tasker():
         logger.debug('savings lab')
         
         # Setting archive path
-        new_lab_archive_path = f"{saved_lab_path}{new_lab_name}.lazy"
+        new_lab_archive_path = f'{saved_lab_path}{new_lab_name}.lazy'
 
         # Creating config_dictionary
         config_dictionary = {}
@@ -359,23 +362,23 @@ class Tasker():
         config_dictionary['vms'] = []
         
         # Creating device dictionary
-        devices = self.create_device_dict_with_vm_descritpions(old_lab_name)
+        devices = self.create_device_dict_with_vm_description(old_lab_name)
         
         # Ctarting iteration using devices dictionary 
-        for device in devices:
+        for device_name, device in devices.items():
             
             # Find out network connections
-            devices[device].get_vm_networks()
+            device.get_vm_networks()
             
             # Adding device parameters to config_dictionary 
-            config_dictionary['vms'].append(devices[device].vm_parameters)
+            config_dictionary['vms'].append(device.vm_parameters)
             
             # Find out vm config
-            devices[device].get_config_vm()
+            device.get_vm_config()
             
             # Getting vm_config to dev_config_str and sending it to archive
-            dev_config_str = devices[device].vm_config
-            device_config_filename = f"{devices[device].vm_short_name}.conf"
+            dev_config_str = device.vm_config
+            device_config_filename = f'{device.vm_short_name}.conf'
             
             self.create_zip_from_string(new_lab_archive_path,
                                         device_config_filename,
@@ -383,7 +386,7 @@ class Tasker():
             
         # converting config_dictionary to yaml string and sending it to archive
         config_str = yaml.dump(config_dictionary)
-        self.create_zip_from_string(new_lab_archive_path, "config.yml",
+        self.create_zip_from_string(new_lab_archive_path, 'config.yml',
                                     config_str)
                                     
         return 0

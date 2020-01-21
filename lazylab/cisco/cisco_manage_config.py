@@ -80,9 +80,9 @@ class CiscoManageConfig(BaseManageConfig, ABC):
             tn.write(b"exit\n") 
             tn.write(b"exit\n") 
             
-        return(0)
+        return 0
     
-    def save_vm(self):
+    def get_vm_config(self):
         
         print('no save avalible for cisco right now')
         

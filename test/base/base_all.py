@@ -73,7 +73,7 @@ class BaseAll(unittest.TestCase):
             with self.subTest(action='get_vm_networks', distribution=distribution):
                 self.assertTrue(bool(interfaces_we_get == interfaces_we_want_to_get))
             
-            # Testing destroy
+            # Testing destroy_vm
             flag = False
             device.destroy_vm()
             
@@ -83,7 +83,7 @@ class BaseAll(unittest.TestCase):
                 except libvirt.libvirtError as err:
                     
                     # checking if libvirt error code is
-                    # 42 - VIR_ERR_OPERATION_INVALID. If not - exit the script
+                    # 42 - VIR_ERR_NO_DOMAIN. If not - exit the script
                     flag = bool(err.get_error_code() == 42)
             
             with self.subTest(action='delete', distribution=distribution):
@@ -93,5 +93,21 @@ class BaseAll(unittest.TestCase):
             # Testing destroy second time
             with self.subTest(action='second_delete', distribution=distribution):
                 self.assertTrue(device.destroy_vm() == 0)
+            
+            # Testing destroy net
+            with libvirt.open('qemu:///system') as conn:
+                network = conn.networkLookupByName('Unknown_net')
+                network.destroy()
+                try:
+                    network = conn.networkLookupByName('Unknown_net')
+                except libvirt.libvirtError as err:
+                    
+                    # checking if libvirt error code is
+                    # 43 - VIR_ERR_NO_NETWORK. If not - exit the script
+                    flag = bool(err.get_error_code() == 43)
+            
+            with self.subTest(action='destroy net', distribution=distribution):
+                self.assertTrue(flag)
+                
         return(0)
         
