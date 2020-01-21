@@ -313,12 +313,12 @@ class Tasker():
         
         # Deploying every device step by step. Methods is actually self
         # explanitory.
-        for device in devices:
+        for device_name, device in devices.items():
             
-            devices[device].create_net()
-            devices[device].create_vm()
-            devices[device].waiting()
-            devices[device].configure_vm()
+            device.create_net()
+            device.create_vm()
+            device.waiting()
+            device.configure_vm()
             
         return 0
 
@@ -335,9 +335,9 @@ class Tasker():
                                                              active_only=False)
 
         # Deleteing vms in dictionary
-        for device in devices:
+        for device_name, device in devices.items():
             
-            devices[device].destroy_vm()
+            device.destroy_vm()
             
         return 0
 

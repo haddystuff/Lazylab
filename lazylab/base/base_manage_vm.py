@@ -81,7 +81,7 @@ class BaseManageVM(ABC):
             for template_volume_name in self.template_volume_list:
                 
                 # Naming volume
-                volume_name = self.vm_name + template_volume_name
+                volume_name = f'{self.vm_name}_{template_volume_name}'
                 
                 # Getting jinja2 template file
                 template = env.get_template(VOLUME_CONFIG_TEMPLATE_NAME)
@@ -128,15 +128,14 @@ class BaseManageVM(ABC):
             # Adding volume locations to volume_location_list
             for template_volume_name in self.template_volume_list:
                 
-                volume_location = (VOLUME_POOL_DIRECTORY + self.vm_name + 
-                                  template_volume_name)
+                volume_location = f'{VOLUME_POOL_DIRECTORY}{self.vm_name}_{template_volume_name}'
                 volume_location_list.append(volume_location)
             
             # Logging
             logger.info(f'Create volume location list:{volume_location_list}')
             
             # Opening vm xml jinja2 template
-            vm_xml_name = self.distribution + '_jinja_template.xml'
+            vm_xml_name = f'{self.distribution}_jinja_template.xml'
             template = env.get_template(vm_xml_name)
             
             # Rendering template so we get config for our vm
@@ -247,7 +246,7 @@ class BaseManageVM(ABC):
             for template_volume_name in self.template_volume_list:
                 
                 #Getting volume name
-                volume_name = self.vm_name + template_volume_name
+                volume_name = f'{self.vm_name}_{template_volume_name}'
                 
                 try:
                     
