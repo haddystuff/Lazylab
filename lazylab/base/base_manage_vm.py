@@ -45,7 +45,7 @@ class BaseManageVM(ABC):
         self.lab_name = kvargs.get('lab_name', 'Unknown_lab')
         self.vm_parameters = kvargs.get('vm_parameters', DEFAULT_VM_PARAMETERS)
         self.vm_short_name = self.vm_parameters.get('name')
-        self.port = kvargs.get('port', None)
+        self.port = str(kvargs.get('port', None))
         self.vm_config = kvargs.get('vm_config', None)
         
         # Setting more variables and unpacking self.vm_parameters
@@ -148,6 +148,7 @@ class BaseManageVM(ABC):
                                             
             # setting vm_xml_config parametr
             self.vm_xml_config = config_string
+            print(self.vm_xml_config)
             
         return 0
 
@@ -158,7 +159,7 @@ class BaseManageVM(ABC):
         # Cloning volume
         self.clone_volume()
         
-        #Creating xml
+        # Creating xml
         self.create_xml()
         
         # Defining vm
@@ -293,7 +294,7 @@ class BaseManageVM(ABC):
             # get 'service' value
             tcp_port = console[0].get('service')
             
-        self.port = tcp_port
+        self.port = str(tcp_port)
         
         return 0
 

@@ -298,7 +298,6 @@ class Tasker():
                                                            vm_parameters=vm_parameters,
                                                            port=cur_port, 
                                                            vm_config=vm_config)
-        
         return devices
 
 
