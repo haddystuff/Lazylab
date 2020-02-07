@@ -25,9 +25,6 @@ TELNET_STARTING_PORT = int(system_config.get('telnet_starting_port', '5000'))
 # Volume pool name
 VOLUME_POOL_NAME = system_config.get('volume_pool_name', 'default')
 
-# Config file name
-CONFIG_FILE_NAME = system_config.get('config_file_name', 'config.yml')
-
 # Volume pool dir
 VOLUME_POOL_DIRECTORY = system_config.get('volume_pool_directory', '/var/lib/libvirt/images/')
 

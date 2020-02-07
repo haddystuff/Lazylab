@@ -2,7 +2,7 @@
 import time
 from abc import ABC
 import sys
-from lazylab.constants import WAITING_TIMER
+from lazylab.base.base_constants import WAITING_TIMER
 import logging
 
 

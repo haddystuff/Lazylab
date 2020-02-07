@@ -1,9 +1,6 @@
 """Constants file"""
 import os
 
-# waiting timer for dump timer in BaseManageConfig
-WAITING_TIMER = 2000
-
 # path to lazylab module
 PATH_TO_MODULE = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,9 +21,6 @@ TEMPLATE_VOLUME_POOL_NAME = 'lazylab'
 
 # template colum pool directory path
 TEMPLATE_VOLUME_POOL_DIRECTORY = PATH_TO_MODULE + '/images/'
-
-# managment net name
-MANAGMENT_NET_NAME = 'default'
 
 # remote image storage directory name
 REMOTE_IMAGE_STORAGE_DIRECTORY_NAME = '/lazylab/images'
@@ -71,3 +65,6 @@ DEFAULT_CONFIG_DICTIONARY = {'telnet_starting_port': '5000',
                              'volume_pool_directory': '/var/lib/libvirt/images/',
                              'images_server': 'afs323dadg4.hopto.org',
                              'labs_server': 'afs323dadg4.hopto.org'}
+                             
+# Config file name
+CONFIG_FILE_NAME = 'config.yml'

@@ -1,10 +1,10 @@
 """Tasker Class"""
-from lazylab.constants import DEVICE_DESCRIPTION_MAIN_STR, LAB_CONFIG_PATH
+from lazylab.constants import DEVICE_DESCRIPTION_MAIN_STR, LAB_CONFIG_PATH, CONFIG_FILE_NAME
 from lazylab.tasker.device_class_generator.device_class_generator import DeviceClassGenerator
 from lazylab.config_parser import *
 from lazylab.tasker.tasker_helpers import *
 from zipfile import ZipFile
-from lazylab.downloader import download_lab_config_file
+from lazylab.tasker.downloader.downloader import download_lab_config_file
 from xml.etree import ElementTree
 import libvirt
 import logging
@@ -17,7 +17,7 @@ class Tasker():
     """Tasker Class"""
     def __init__(self, **kvargs):
         """
-        This is business logic class.
+        This is business rules class.
         All methods of this class should be called from UI.
         """
         

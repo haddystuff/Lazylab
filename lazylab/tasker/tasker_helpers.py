@@ -2,7 +2,7 @@
 import socket
 import logging
 import os
-from lazylab.downloader import download_template_image
+from lazylab.tasker.downloader.downloader import download_template_image
 from lazylab.constants import TEMPLATE_IMAGE_LIST, TEMPLATE_VOLUME_POOL_DIRECTORY, POSSIBLE_OS_LIST
 from zipfile import ZipFile
 
