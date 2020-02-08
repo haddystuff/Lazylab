@@ -84,6 +84,8 @@ class CiscoManageConfig(BaseManageConfig, ABC):
     
     def get_vm_config(self):
         
+        # Just for now create str with one space
+        self.vm_config = ' '
         print('no save avalible for cisco right now')
         
         return 0

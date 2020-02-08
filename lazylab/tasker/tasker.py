@@ -215,7 +215,7 @@ class Tasker():
         # Creating device dictionary
         devices = self.create_device_dict_with_vm_description(old_lab_name)
         
-        # Ctarting iteration using devices dictionary 
+        # Starting iteration using devices dictionary 
         for device_name, device in devices.items():
             
             # Find out network connections

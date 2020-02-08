@@ -18,8 +18,7 @@ TEST_VM_PARAMETERS = {'juniper_vmx_14': {'name': 'Tested_VM_1',
 
 XML_EXPECTED = {
 'juniper_vmxvcp_18':
-"""
-<domain type='kvm'>
+"""<domain type='kvm'>
   <name>Test_Lab_Tested_VM_2</name>
   <description>#Auto-generated vm with lazylab
 lab_name: Test_Lab
@@ -134,11 +133,9 @@ vm:
     <memballoon model='virtio'>
     </memballoon>
   </devices>
-</domain>
-""",
+</domain>""",
 'juniper_vmx_14':
-"""
-<domain type='kvm'>
+"""<domain type='kvm'>
   <name>Test_Lab_Tested_VM_1</name>
   <description>#Auto-generated vm with lazylab
 lab_name: Test_Lab
@@ -245,8 +242,7 @@ vm:
       <address type='pci' domain='0x0000' bus='0x00' slot='0x0a' function='0x0'/>
     </memballoon>
   </devices>
-</domain>
-"""
+</domain>"""
 }
 
 class BaseAll(unittest.TestCase):
@@ -267,10 +263,12 @@ class BaseAll(unittest.TestCase):
                 cur_port += 1
             self.devices[distribution] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters, port=cur_port)
         
-    def test_clone_delete_volume(self):
         
+    def test_clone_delete_volume(self):
+        """Testing clone volume and delete volume for every device in list"""
         for distribution, device in self.devices.items():
             
+            # Cloning volumes
             with self.subTest(action='clone', distribution=distribution):
                 device.clone_volume()
                 
@@ -287,6 +285,7 @@ class BaseAll(unittest.TestCase):
             with self.subTest(action='delete', distribution=distribution):
                 device.delete_volume()
                 self.assertTrue(not (os.path.exists(clone_to_path)))
+    
     
     def test_create_destroy_get_tcp_port_get_vm_networks(self):
         for distribution, device in self.devices.items():
@@ -347,6 +346,15 @@ class BaseAll(unittest.TestCase):
                         # 43 - VIR_ERR_NO_NETWORK. If not - exit the script
                         flag = bool(err.get_error_code() == 43)
                 self.assertTrue(flag)
-                
-        return(0)
+        return 0
         
+    def test_a_create_xml(self):
+        for distribution, device in self.devices.items():
+            # Testing clone
+            with self.subTest(action='create_xml', distribution=distribution):
+                device.create_xml()
+                print(device.vm_xml_config)
+                print(XML_EXPECTED.get(distribution))
+                self.assertTrue(device.vm_xml_config == XML_EXPECTED.get(distribution))
+                
+        return 0
