@@ -16,7 +16,8 @@ TEST_VM_PARAMETERS = {'juniper_vmx_14': {'name': 'Tested_VM_1',
                                            'version': 18, 
                                            'interfaces': {'ge-0/0/0': 'Unknown_net'}}}
 
-XML_EXPECTED = {'juniper_vmxvcp_18':
+XML_EXPECTED = {
+'juniper_vmxvcp_18':
 """
 <domain type='kvm'>
   <name>Test_Lab_Tested_VM_2</name>
@@ -287,7 +288,7 @@ class BaseAll(unittest.TestCase):
                 device.delete_volume()
                 self.assertTrue(not (os.path.exists(clone_to_path)))
     
-    def test_create_destroy_vm(self):
+    def test_create_destroy_get_tcp_port_get_vm_networks(self):
         for distribution, device in self.devices.items():
             
             # Testing create
