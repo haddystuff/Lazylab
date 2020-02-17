@@ -1,6 +1,6 @@
 """Tasker Class"""
 from lazylab.constants import DEVICE_DESCRIPTION_MAIN_STR, LAB_CONFIG_PATH, CONFIG_FILE_NAME
-from lazylab.tasker.device_class_generator.device_class_generator import DeviceClassGenerator
+from lazylab.tasker.device_creator.device_creator import DeviceCreator
 from lazylab.config_parser import *
 from lazylab.tasker.tasker_helpers import *
 from zipfile import ZipFile
@@ -38,6 +38,9 @@ class Tasker():
         # Create devices dictionary
         devices = {}
         
+        # Creating creator object
+        creator = DeviceCreator(**self.vms_attributes)
+        
         with libvirt.open('qemu:///system') as virt_conn:
             
             # Getting runned vms objects in loop
@@ -69,11 +72,13 @@ class Tasker():
                     # Getting vm_parameters
                     vm_parameters = vm_description_dict.get('vm')
                     
-                    # Generating device dictionary(need to change way of generating later)
+                    # Getting vm_name
+                    vm_name = vm_parameters.get('name')
+                    
+                    # Creating device dictionary
                     if vm_description_dict['lab_name'] == lab_name:
-                        generator = DeviceClassGenerator(**self.vms_attributes)
-                        DeviceClass = generator.generate_class(os=vm_parameters.get('os'), version=vm_parameters.get('version'))
-                        devices[lab_name + '_' + vm_parameters.get('name')] = DeviceClass(lab_name=lab_name, vm_parameters=vm_parameters)
+                        devices[f'{lab_name}_{vm_name}'] = creator.create_device(lab_name=lab_name, 
+                                                           vm_parameters=vm_parameters)
         
         return devices
 
@@ -114,13 +119,14 @@ class Tasker():
         vms_parameters_list = conf_yaml.get('vms')
         devices = {}
         
+        # Creating generator object
+        creator = DeviceCreator(**self.vms_attributes)
+        
         # Creating vm dictionary called "devices" one by one 
         for vm_parameters in vms_parameters_list:
             
             # Unpacking parameters
             vm_config_file = vm_parameters.get('name') + '.conf'
-            os = vm_parameters.get('os')
-            version = str(vm_parameters.get('version'))
             vm_name = vm_parameters.get('name')
             
             # Getting config of device from zip archive
@@ -138,18 +144,17 @@ class Tasker():
                 
                 vm_config = None
             
-            #Take next port to use as telnet console if it isn't in use
+            # Take next port to use as telnet console if it isn't in use
             cur_port += 1
             while(is_port_in_use(cur_port)):
                 cur_port += 1
             
-            #Creating objects base on its OS
-            generator = DeviceClassGenerator(**self.vms_attributes)
-            DeviceClass = generator.generate_class(os=os, version=version)
-            devices[f'{lab_name}_{vm_name}'] = DeviceClass(lab_name=lab_name, 
+            # Creating device dict
+            devices[f'{lab_name}_{vm_name}'] = creator.create_device(lab_name=lab_name, 
                                                            vm_parameters=vm_parameters,
                                                            port=cur_port, 
                                                            vm_config=vm_config)
+                                                           
         return devices
 
 
