@@ -65,20 +65,22 @@ class Tasker():
                 # Checking if vm is auto-generated
                 if DEVICE_DESCRIPTION_MAIN_STR in vm_text_description: 
                     
-                    # Loading discription in yaml format to lab_parameters variable
+                    # Loading discription in yaml format to lab_parameters
+                    # variable
                     vm_description_dict = yaml.load(vm_text_description, 
                                                Loader=yaml.FullLoader)
                     
-                    # Getting vm_parameters
-                    vm_parameters = vm_description_dict.get('vm')
-                    
-                    # Getting vm_name
-                    vm_name = vm_parameters.get('name')
-                    
-                    # Creating device dictionary
                     if vm_description_dict['lab_name'] == lab_name:
+                    
+                        # Getting vm_parameters
+                        vm_parameters = vm_description_dict.get('vm')
+                        
+                        # Getting vm_name
+                        vm_name = vm_parameters.get('name')
+                        
+                        # Creating device dictionary
                         devices[f'{lab_name}_{vm_name}'] = creator.create_device(lab_name=lab_name, 
-                                                           vm_parameters=vm_parameters)
+                                                               vm_parameters=vm_parameters)
         
         return devices
 
