@@ -3,7 +3,8 @@ Lazylab Structure
 
 Core module is called Tasker.
 It consists of Class named Tasker that implements business rules.
-Gui module(it only has "cli GUI" by now) creates object of Tasker class and 
+
+Usually GUI module(it only has "cli GUI" by now) creates object of Tasker class and 
 runs simple named methods.
 It looks like this:
 
@@ -28,7 +29,7 @@ device_creator is just small factory which generates devices(VMs) objects.
 After dictionary of devices objects created Tasker runs some methods of this objects.
 For example for lab deleting Tasker runs ``device.destroy_vm()``
 
-================================================
+===============================
 
 Also there are more submodules in Tasker module:
 
@@ -37,6 +38,6 @@ Also there are more submodules in Tasker module:
 2. downloader submodule helps tasker to download labs archives and template images.
 
 
-=================================================
+================================
 
 You can see full structure of lazylab in dependency graph.
