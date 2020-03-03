@@ -8,10 +8,10 @@ Usually GUI module(it only has "cli GUI" by now) creates object of Tasker class 
 runs simple named methods.
 It looks like this:
 
-```
+``
 task = Tasker()
 task.deploy_lab(lab_name)
-```
+``
 
 Logic of Tasker class object is quite simple:
 First it usually creates dictionary of VMs objects
@@ -20,10 +20,10 @@ Purpose of this object is to fully control one vm.
 Usually type of this object is self explanatory, for example: ``juniper_vmx_14``
 All of this objects usually creates by "Device Creator" submodule which runs by Tasker, for example:
 
-```
+``
 creator = DeviceCreator(**self.vms_attributes)
 device = creator.create_device(lab_name=lab_name, vm_parameters=vm_parameters)
-```
+``
 
 device_creator is just small factory which generates devices(VMs) objects.
 After dictionary of devices objects created Tasker runs some methods of this objects.
