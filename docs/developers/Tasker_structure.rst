@@ -1,4 +1,4 @@
-Lazylab Structure
+Tasker Structure
 ======================
 
 Core module is called Tasker.
@@ -15,7 +15,7 @@ Logic of Tasker class object is quite simple:
 First it usually creates dictionary of VMs objects
 VM object(called "devices" in code) - object that describe vm.
 Purpose of this object is to fully control one vm.
-Usually type of this object is self explanatory, for example: ``juniper_vmx_14``
+Usually type of this object is self explanatory, for example: ``juniper_vmx_14_ManageAll``
 All of this objects usually creates by "Device Creator" submodule which runs by Tasker, for example:
 
 ``creator = DeviceCreator(**self.vms_attributes)
