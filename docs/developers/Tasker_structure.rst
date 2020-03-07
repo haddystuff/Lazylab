@@ -19,6 +19,7 @@ Usually type of this object is self explanatory, for example: ``JuniperVmx14Mana
 All of this objects usually creates by "Device Creator" submodule which runs by Tasker, for example:
 
 ``creator = DeviceCreator(**self.vms_attributes)
+
 device = creator.create_device(lab_name=lab_name, vm_parameters=vm_parameters)``
 
 device_creator is just small factory which generates devices(VMs) objects.
@@ -29,7 +30,7 @@ For example for lab deleting Tasker runs ``device.destroy_vm()``
 
 Also there are more submodules in Tasker module:
 
-1. tasker_helpers submodule is just a bunch of functions with helps Tasker to do his work.
+1. tasker_helpers submodule is just a bunch of functions which helps Tasker to do his work.
 
 2. downloader submodule helps tasker to download labs archives and template images.
 

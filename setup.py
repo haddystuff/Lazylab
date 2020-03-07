@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'lazylab = lazylab.lazylab:main',
+            'lazylab = lazylab.lazylab_cli:main',
         ],
     }
 )
