@@ -11,8 +11,7 @@ List of base classes:
 
 1. BaseManageVM - generic class contains vm management methods that should be common for all VM object.
 
-2. BaseManageConfig - special class that inherited by vendor specific ManageConfig classes.
-It contains abstract methods and some default methods for vendor specific ManageConfig classes to be inherit.
+2. BaseManageConfig - special class that inherited by vendor specific ManageConfig classes. It contains abstract methods and some default methods for vendor specific ManageConfig classes to be inherit.
 
 2. BaseQCOWSupport - class that contains qcow2 image format support
 
