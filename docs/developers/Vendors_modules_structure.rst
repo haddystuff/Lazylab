@@ -15,7 +15,7 @@ Part that depends on Vendor of VM.
 
 For now vendor classes should define this methods:
 
-1. configure_vm - connects to VM and commits new config to it
+1. configure_vm - connects to VM and commits new config to it.
 
-2. get_vm_config - connects ot VM, read and save config to self.vm_config valuable
+2. get_vm_config - connects ot VM, read and save config to self.vm_config valuable.
 

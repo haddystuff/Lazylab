@@ -2,10 +2,11 @@ Base classes
 =======================
 
 Base classes are inherited by Manage Classes.
+
 Manage Class - class which instances are VM objects.
 VM object(called "devices" in code) - object that describe vm.
 Purpose of this object is to fully control one vm.
-Usually type of this object is self explanatory, for example: ``JuniperVmx14ManageAll``
+Usually type of this object is self explanatory, for example: ``JuniperVmx14ManageAll``.
 
 List of base classes:
 
