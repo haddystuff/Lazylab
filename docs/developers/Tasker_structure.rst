@@ -1,7 +1,7 @@
 Tasker Structure
 ======================
 
-Core module is called Tasker.
+Tasker is core module.
 It consists of Class named Tasker that implements business rules.
 
 Usually GUI module(it only has "cli GUI" by now) creates object of Tasker class and 
@@ -15,7 +15,7 @@ Logic of Tasker class object is quite simple:
 First it usually creates dictionary of VMs objects
 VM object(called "devices" in code) - object that describe vm.
 Purpose of this object is to fully control one vm.
-Usually type of this object is self explanatory, for example: ``juniper_vmx_14_ManageAll``
+Usually type of this object is self explanatory, for example: ``JuniperVmx14ManageAll``
 All of this objects usually creates by "Device Creator" submodule which runs by Tasker, for example:
 
 ``creator = DeviceCreator(**self.vms_attributes)
