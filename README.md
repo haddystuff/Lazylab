@@ -42,12 +42,12 @@ You can mostly do three things:
 
 Supported network devices
 ---------
-Juniper VMX: 14, 18(vcp only)
-Cisco iosxrv: 5
+* Juniper VMX 14
+* Juniper VMX 18(vcp only)
+* Cisco iosxrv 5
 
 
 Labs list
 ---------
 * test
-
 * default
