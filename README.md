@@ -8,9 +8,9 @@ It can be easily implemented to already running libvirt setup.
 Lazylab fully compatible with virt-manager, cockpit-machines.
 
 Install
-======
+--------------
 
-## Fedora/Ubuntu
+### Fedora/Ubuntu
 
 install libvirt
 
@@ -24,7 +24,7 @@ git clone https://github.com/haddystuff/lazylab
 ```
 
 Running
-======
+------------
 
 You can mostly do three things:
 
@@ -39,12 +39,12 @@ You can mostly do three things:
 
 
 Supported network devices
-======
+---------
 Juniper VMX: 14, 18(vcp only)
 Cisco iosxrv: 5
 
 
 Avalible labs
-======
+---------
 test
 default
