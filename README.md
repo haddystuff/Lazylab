@@ -1,9 +1,11 @@
 Lazylab
 ======
-Lazylab is Network lab Auto-deployment tool.
+Lazylab is network lab auto-deployment tool.
 
-Lazylab using KVM hypervisor.
+It's just a python module that can download vm configs, topology, images and deploy fully operation lab in one command.
+You just need to choose lab from the Labs list.
 
+Lazylab using libvirt API to KVM hypervisor.
 It can be easily implemented to already running libvirt setup.
 Lazylab fully compatible with virt-manager, cockpit-machines.
 
@@ -44,7 +46,8 @@ Juniper VMX: 14, 18(vcp only)
 Cisco iosxrv: 5
 
 
-Avalible labs
+Labs list
 ---------
-test
-default
+* test
+
+* default
