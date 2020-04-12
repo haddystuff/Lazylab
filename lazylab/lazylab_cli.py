@@ -13,7 +13,7 @@ Its calling tasker functions
 # Create a custom logger
 logger = logging.getLogger("lazylab")
 #Set level
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 # Create logger handler
 logger_handler = logging.StreamHandler()
 # set format

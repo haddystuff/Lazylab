@@ -1,14 +1,11 @@
 """Tasker Class"""
-from lazylab.constants import DEVICE_DESCRIPTION_MAIN_STR, LAB_CONFIG_PATH, CONFIG_FILE_NAME
-from lazylab.tasker.device_creator.device_creator import DeviceCreator
-from lazylab.config_parser import *
-from lazylab.tasker.tasker_helpers import *
-from zipfile import ZipFile
-from lazylab.tasker.downloader.downloader import download_lab_config_file
-from xml.etree import ElementTree
-import libvirt
+from lazylab.constants import LAB_CONFIG_PATH
+from lazylab.tasker.dictionary_creator.dictionary_creator import DictionaryCreator
+from lazylab.tasker.zipper import *
+from lazylab.tasker.exceptions import *
+from lazylab.tasker.yaml_parser import parse_yaml
+from lazylab.tasker.downloader.downloader import check_images, download_lab_config_file
 import logging
-import yaml
 
 
 logger = logging.getLogger(__name__)
@@ -23,154 +20,34 @@ class Tasker():
         
         # Saving arguments
         self.vms_attributes = kvargs
-        
-
-    def create_device_dict_with_vm_description(self, lab_name, active_only=True):
-        """
-        This method create device dictionary from vm descriptions that we
-        created earlier. Also users can create it by hand.
-        It actially looks like this:
-        { Testlab_router1: CiscoIOSXR15ManageAll_object
-          Testlab_router2: JuniperVMX14ManageAll_object
-        }
-        """
-        
-        # Create devices dictionary
-        devices = {}
-        
-        # Creating creator object
-        creator = DeviceCreator(**self.vms_attributes)
-        
-        with libvirt.open('qemu:///system') as virt_conn:
-            
-            # Getting runned vms objects in loop
-            for vm_libvirt_object in virt_conn.listAllDomains(int(active_only)): 
-                
-                # Getting xml of vm and root of that xml
-                vm_xml_root = ElementTree.fromstring(vm_libvirt_object.XMLDesc(0)) 
-                
-                # Trying to get description
-                try:
-                    
-                    vm_xml_description = next(vm_xml_root.iter('description'))
-                    
-                except StopIteration:
-                    
-                    # Going to the next element of loop if no description found
-                    continue
-                
-                # Getting text of description
-                vm_text_description = vm_xml_description.text
-                
-                # Checking if vm is auto-generated
-                if DEVICE_DESCRIPTION_MAIN_STR in vm_text_description: 
-                    
-                    # Loading discription in yaml format to lab_parameters
-                    # variable
-                    vm_description_dict = yaml.load(vm_text_description, 
-                                               Loader=yaml.FullLoader)
-                    
-                    if vm_description_dict['lab_name'] == lab_name:
-                    
-                        # Getting vm_parameters
-                        vm_parameters = vm_description_dict.get('vm')
-                        
-                        # Getting vm_name
-                        vm_name = vm_parameters.get('name')
-                        
-                        # Creating device dictionary
-                        devices[f'{lab_name}_{vm_name}'] = creator.create_device(lab_name=lab_name, 
-                                                               vm_parameters=vm_parameters)
-        
-        return devices
-
-
-    def create_device_dict_with_archive(self, config_archive_name):
-        """
-        This function creating dict of manage objects from zip archive. 
-        It actially looks like this:
-        { Testlab_router1: CiscoIOSXR15ManageAll_object
-          Testlab_router2: JuniperVMX14ManageAll_object
-        }
-        """
-        
-        # Getting config_archive_location
-        config_archive_location = LAB_CONFIG_PATH + config_archive_name
-        
-        # Opening config file in zip archive, parsing with yaml and sending to
-        # conf_yaml valiable
-        try:
-            
-            with ZipFile(config_archive_location, 'r') as lazy_archive:
-                conf_yaml = yaml.load(lazy_archive.read(CONFIG_FILE_NAME), 
-                                      Loader=yaml.FullLoader)
-                                      
-        except FileNotFoundError as err:
-            
-            logger.info(f'{config_archive_location} not found, trying to download from server')
-            
-            # Downloading .lazy archive from server
-            download_lab_config_file(config_archive_name)
-        
-        # Validating syntax and more of conf_yaml
-        yaml_validate(conf_yaml)
-        
-        # Setting vm and lab parameters
-        lab_name = conf_yaml.get('lab_name')
-        cur_port = TELNET_STARTING_PORT
-        vms_parameters_list = conf_yaml.get('vms')
-        devices = {}
-        
-        # Creating generator object
-        creator = DeviceCreator(**self.vms_attributes)
-        
-        # Creating vm dictionary called "devices" one by one 
-        for vm_parameters in vms_parameters_list:
-            
-            # Unpacking parameters
-            vm_config_file = vm_parameters.get('name') + '.conf'
-            vm_name = vm_parameters.get('name')
-            
-            # Getting config of device from zip archive
-            try:
-                
-                # Opening .lazy file
-                with ZipFile(config_archive_location, 'r') as lazy_archive:
-                    
-                    # Decoding from utf-8
-                    vm_config = lazy_archive.read(vm_config_file).decode('utf-8')
-                    
-            except KeyError as err:
-                
-                logger.warning(f'{err}')
-                
-                vm_config = None
-            
-            # Take next port to use as telnet console if it isn't in use
-            cur_port += 1
-            while(is_port_in_use(cur_port)):
-                cur_port += 1
-            
-            # Creating device dict
-            devices[f'{lab_name}_{vm_name}'] = creator.create_device(lab_name=lab_name, 
-                                                           vm_parameters=vm_parameters,
-                                                           port=cur_port, 
-                                                           vm_config=vm_config)
-                                                           
-        return devices
 
 
     def deploy_lab(self, lab_name):
         """
-        This method run throgh all small methods that helps to deploy lab
+        Deploying lab
         """
         
         logger.info('deploying lab')
         
-        config_archive_name = f'{lab_name}.lazy'
+        # Unzip lab arhive to get configs of lab and devices
+        try:
+            conf_yaml, vm_configs = unzip_lab(lab_name)
+            
+        # If there is no archive the download it
+        except NoLabArchive:
+            
+            logger.warning('No lab archive in local storage')
+            download_lab_config_file(lab_name)
         
-        # Create dictionary of managment objects using function
-        devices = self.create_device_dict_with_archive(config_archive_name)
+        # Validating syntax of conf_yaml    
+        conf_dict = parse_yaml(conf_yaml)
+            
+        # Checking if requested in conf_yaml file images exist
+        check_images(conf_dict)
+        
+        # Create dictionary of managment objects
+        device_dict_creator = DictionaryCreator(**self.vms_attributes)
+        devices = device_dict_creator.create_device_dict_with_archive(conf_dict, vm_configs)
         
         # Deploying every device step by step. Methods is actually self
         # explanitory.
@@ -192,8 +69,9 @@ class Tasker():
         logger.info('deleting lab')
         
         # generating device dictionary
-        devices = self.create_device_dict_with_vm_description(lab_name, 
-                                                             active_only=False)
+        device_dict_creator = DictionaryCreator(**self.vms_attributes)
+        devices = device_dict_creator.create_device_dict_with_vm_description(lab_name, 
+                                                                    active_only=False)
 
         # Deleteing vms in dictionary
         for device_name, device in devices.items():
@@ -206,7 +84,7 @@ class Tasker():
     def save_lab(self, old_lab_name, new_lab_name, saved_lab_path = LAB_CONFIG_PATH):
         """ 
         Save configs
-        Works bad sometimesl. need to work on this more
+        needed some refactoring
         """
         
         logger.debug('savings lab')
@@ -214,36 +92,35 @@ class Tasker():
         # Setting archive path
         new_lab_archive_path = f'{saved_lab_path}{new_lab_name}.lazy'
 
-        # Creating config_dictionary
-        config_dictionary = {}
-        config_dictionary['lab_name'] = new_lab_name
-        config_dictionary['vms'] = []
-        
+        # Creating new lab config_dictionary
+        conf_dict = {}
+        conf_dict['lab_name'] = new_lab_name
+        conf_dict['vms'] = []
+        vm_configs = {}
         # Creating device dictionary
-        devices = self.create_device_dict_with_vm_description(old_lab_name)
+        device_dict_creator = DictionaryCreator(**self.vms_attributes)
+        devices = device_dict_creator.create_device_dict_with_vm_description(old_lab_name)
         
         # Starting iteration using devices dictionary 
+        # Saving lab step by step. Methods is actually self
+        # explanitory.
         for device_name, device in devices.items():
             
             # Find out network connections
             device.get_vm_networks()
             
             # Adding device parameters to config_dictionary 
-            config_dictionary['vms'].append(device.vm_parameters)
+            conf_dict['vms'].append(device.vm_parameters)
             
-            # Find out vm config
+            # Getting vm config
             device.get_vm_config()
             
+            # Getting short name
+            device_short_name = device.vm_short_name
+            
             # Getting vm_config to dev_config_str and sending it to archive
-            dev_config_str = device.vm_config
-            device_config_filename = f'{device.vm_short_name}.conf'
-            
-            create_zip_from_string(new_lab_archive_path,
-                                   device_config_filename,
-                                   dev_config_str)
-            
-        # Converting config_dictionary to yaml string and sending it to archive
-        config_str = yaml.dump(config_dictionary)
-        create_zip_from_string(new_lab_archive_path, 'config.yml', config_str)
+            vm_configs[device_short_name] = device.vm_config
+        
+        zip_to_archive(conf_dict, vm_configs, new_lab_archive_path)
                                     
         return 0

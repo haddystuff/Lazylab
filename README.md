@@ -44,7 +44,7 @@ Supported network devices
 ---------
 * Juniper VMX 14
 * Juniper VMX 18(vcp only)
-* Cisco iosxrv 5
+* Cisco IOSXRV 5
 
 
 Labs list

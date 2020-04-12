@@ -84,8 +84,55 @@ class CiscoManageConfig(BaseManageConfig, ABC):
     
     def get_vm_config(self):
         
-        # Just for now create str with one space
-        self.vm_config = ' '
-        print('no save avalible for cisco right now')
+        self.get_vm_tcp_port()
+    
+        #Connecting to console using telnet
+        with telnetlib.Telnet("127.0.0.1", str(self.port), 5) as tn:
+        
+            #just in case
+            tn.write(b"\n\r") 
+            
+            # read until we find "name: " and saving output
+            output = tn.read_until(b"name: ", 5)
+            
+            # logging output
+            logger.info(output.decode('utf-8'))
+            
+            # sending "root\r"
+            tn.write(b"cisco\r") 
+            
+            # reading
+            output = tn.read_until(b"word: ", 5)
+            
+            # logging output
+            logger.info(output.decode('utf-8'))
+            
+            # sending
+            tn.write(b"cisco\r") 
+            
+            # reading
+            output = tn.read_until(b"#", 5)
+            
+            # logging output
+            logger.info(output.decode('utf-8'))
+            
+            # sending
+            tn.write(b"term len 0\n show running-config\n") 
+            
+            # read until configuration starts
+            output = tn.read_until(b"Building configuration...", 5)
+            
+            # logging output
+            logger.info(output.decode('utf-8'))
+            
+            # reading
+            output = tn.read_until(b"end", 5)
+            
+            # logging output
+            logger.info(output.decode('utf-8'))
+            
+            self.vm_config = output.decode('utf-8')
+             
+            tn.write(b"exit\n") 
         
         return 0

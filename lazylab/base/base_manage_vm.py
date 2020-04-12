@@ -30,7 +30,7 @@ class BaseManageVM(ABC):
         with one from config.yml - file with all of vm parameters and topology.
         Usually looks like this: {'name': 'router2', 
                                   'os': 'cisco_iosxr',
-                                  'version': 15,
+                                  'version': 5,
                                   'interfaces': {'ge-0/0/0': 'Vlan1', 
                                                  'ge-0/0/1': 'Vlan2'}
                                   }
@@ -55,9 +55,15 @@ class BaseManageVM(ABC):
         self.distribution = self.os + '_' + self.version
         
         # Getting some variables from constants
-        self.interface_offset = INTERFACE_OFFSET[self.distribution]
-        self.template_volume_list = TEMPLATE_IMAGE_LIST.get(self.distribution)
-        self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
+        try:
+            self.interface_offset = INTERFACE_OFFSET[self.distribution]
+            self.template_volume_list = TEMPLATE_IMAGE_LIST.get(self.distribution)
+            self.interface_prefix = INTERFACE_PREFIX.get(self.distribution)
+            
+        except KeyError as err:
+            
+            logger.error(f'there is no {err} in list of allowed distribution\nPlease check lab or device config')
+            exit(1)
         
         # Setting description for vm
         self.vm_discription = f"{DEVICE_DESCRIPTION_MAIN_STR}\n"\
@@ -148,7 +154,6 @@ class BaseManageVM(ABC):
                                             
             # setting vm_xml_config parametr
             self.vm_xml_config = config_string
-            print(self.vm_xml_config)
             
         return 0
 
