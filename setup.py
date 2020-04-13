@@ -20,7 +20,9 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'lazylab = lazylab.lazylab_cli:main',
+            'lazylab-deploy = lazylab.cli.cli_deploy:main',
+            'lazylab-delete = lazylab.cli.cli_delete:main',
+            'lazylab-save = lazylab.cli.cli_save:main'
         ],
     }
 )

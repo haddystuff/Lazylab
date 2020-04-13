@@ -1,7 +1,7 @@
 Save
 =================
 
-``save`` command work logic can be seen below:
+``lazylab-save`` command work logic can be seen below:
 
 1. Parsing all VMs description which have {lab_name} in their names of special string('#Auto-generated vm with lazylab' by default)
 

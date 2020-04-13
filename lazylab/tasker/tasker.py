@@ -81,7 +81,7 @@ class Tasker():
         return 0
 
 
-    def save_lab(self, old_lab_name, new_lab_name, saved_lab_path = LAB_CONFIG_PATH):
+    def save_lab(self, lab_name, new_lab_name, saved_lab_path = LAB_CONFIG_PATH):
         """ 
         Save configs
         needed some refactoring
@@ -99,7 +99,7 @@ class Tasker():
         vm_configs = {}
         # Creating device dictionary
         device_dict_creator = DictionaryCreator(**self.vms_attributes)
-        devices = device_dict_creator.create_device_dict_with_vm_description(old_lab_name)
+        devices = device_dict_creator.create_device_dict_with_vm_description(lab_name)
         
         # Starting iteration using devices dictionary 
         # Saving lab step by step. Methods is actually self

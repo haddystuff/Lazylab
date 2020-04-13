@@ -6,14 +6,14 @@ You can use ``--help`` flag to see help page.
 
 You can mostly do three things:
 
-1. Deploy lab you want with ``deploy`` argument, for example:
-``lazylab deploy test_all`` - wich will deploy lab named 'test_all'.
+1. Deploy lab you want with ``lazylab-deploy`` command, for example:
+``lazylab-deploy test_all`` - wich will deploy lab named 'test_all'.
 
-2. Delete lab you want with ``delete`` argument, for example:
-``lazylab delete test_all`` - wich will delete lab named 'test_all'.
+2. Delete lab you want with ``lazylab-delete`` command, for example:
+``lazylab-delete test_all`` - wich will delete lab named 'test_all'.
 
-3. Save lab you want with ``save`` and ``as`` arguments, for example:
-``lazylab save test_all as test_all_v2`` - wich will save lab named 'test_all' as 'test_all_v2'.
+3. Save lab you want with ``lazylab-save`` command with 2 arguments, for example:
+``lazylab-save test_all test_all_v2`` - wich will save lab named 'test_all' as 'test_all_v2'.
 
 
 Debug

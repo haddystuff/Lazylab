@@ -1,7 +1,7 @@
 Deploy
 =================
 
-``deploy`` command work logic can be seen below:
+``lazylab-deploy`` command work logic can be seen below:
 
 
 1. Trying to find lab archive in lab archive directory('{PATH_TO_MODULE}/labs/' by default) which name is {lab_name}.lazy. Actualy .lazy is just a fancy extension name for usual zip archive. There are config.yml file(it consists of lab topology and text description of all VMs in lab) and raw configs of VMs in .lazy archive.
