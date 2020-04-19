@@ -4,6 +4,7 @@ from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 from jnpr.junos import exception
 from lazylab.base.base_manage_config import BaseManageConfig 
+from lazylab.base.base_decorators import BaseDecorators
 from lazylab.config_parser import PASSWORD_LIST
 import telnetlib
 import logging
@@ -33,17 +34,9 @@ class JuniperManageConfig(BaseManageConfig, ABC):
 
         return 0
     
-
+    @BaseDecorators.preconfigure
     def configure_vm(self):
         """Configuring method"""
-        
-        #Checking if config is existing
-        if not self.vm_config:
-            
-            logger.warning(f'No config file for {self.vm_name}.'\
-                           f'Skipping configuration step')
-            
-            return 0
         
         #connecting to device, loading config and commiting
         try:

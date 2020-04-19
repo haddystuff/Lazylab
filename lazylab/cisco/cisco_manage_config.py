@@ -2,6 +2,7 @@
 from abc import ABC
 import telnetlib
 from lazylab.base.base_manage_config import BaseManageConfig
+from lazylab.base.base_decorators import BaseDecorators
 from abc import ABC
 import logging
 
@@ -13,16 +14,18 @@ class CiscoManageConfig(BaseManageConfig, ABC):
     This is base Cisco manageconfig class, you have to inherit from it when
     writing new os manage_config class.
     """
-
+    
+    
+    @BaseDecorators.preconfigure
     def configure_vm(self):
         
-        #Checking if config is exist
-        if not self.vm_config:
+        # #Checking if config is exist
+        # if not self.vm_config:
             
-            logger.warning(f'No config file for {self.vm_name}.'\
-                           f'Skipping configuration step')
+            # logger.warning(f'No config file for {self.vm_name}.'\
+                           # f'Skipping configuration step')
                            
-            return 0
+            # return 0
     
         #Connecting to console using telnet
         with telnetlib.Telnet("127.0.0.1", str(self.port), 5) as tn:

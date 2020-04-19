@@ -36,23 +36,27 @@ TEMPLATE_IMAGE_LIST = {'juniper_vmx_14': ['juniper_vmx_14_template.qcow2'],
                        'juniper_vmxvcp_18': ['juniper_vmxvcp_18_A_template.qcow2', 
                                              'juniper_vmxvcp_18_B_template.qcow2', 
                                              'juniper_vmxvcp_18_C_template.qcow2'],
+                       'tinycore_custom_11': ['tinycore_custom_11_template.qcow2'],
                        'cisco_iosxr_5': ['cisco_iosxr_5_template.qcow2']}
                       
 # Interface offset - mapping of device os -> number of interfaces wich use 
 # as managment or something
 INTERFACE_OFFSET = {'cisco_iosxr_5': 1,
                     'juniper_vmx_14': 2,
+                    'tinycore_custom_11': 0,
                     'juniper_vmxvcp_18': 2}
 
 # Mapping of device os -> name of interface
 # just for naming purposes
 INTERFACE_PREFIX = {'cisco_iosxr_5': 'ge',
                     'juniper_vmx_14': 'em',
+                    'tinycore_custom_11': 'eth',
                     'juniper_vmxvcp_18': 'ge'}
 
 # Possible os list
 POSSIBLE_OS_LIST = ('juniper_vmx_14',
                     'cisco_iosxr_5', 
+                    'tinycore_custom_11',
                     'juniper_vmxvcp_18')
 
 # First string in description should be

@@ -55,7 +55,7 @@ class Tasker():
             
             device.create_net()
             device.create_vm()
-            device.waiting()
+            #device.waiting()
             device.configure_vm()
             
         return 0
